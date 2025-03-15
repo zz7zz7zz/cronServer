@@ -1,0 +1,83 @@
+// package main
+
+// import (
+// 	"fmt"
+// 	"sync"
+
+// 	"github.com/robfig/cron/v3"
+
+// 	// "cronServer"
+// 	"cronServer/tasks"
+// )
+
+// //定时任务学习视频
+// //https://www.bilibili.com/video/BV14M41197yt/?spm_id_from=333.337.search-card.all.click&vd_source=630aca8d31fad0f6a159cf69cf0dca35
+// //https://www.bilibili.com/video/BV1M24y1F7sN?spm_id_from=333.788.videopod.sections&vd_source=630aca8d31fad0f6a159cf69cf0dca35
+// //WaitGroup
+// //https://www.bilibili.com/video/BV1bN4y1Z7BT?spm_id_from=333.788.videopod.episodes&vd_source=630aca8d31fad0f6a159cf69cf0dca35&p=131
+
+// var c2 *cron.Cron
+// var wg sync.WaitGroup
+
+// func main() {
+// 	//Run阻塞
+// 	// c1 := cron.New(cron.WithSeconds())
+// 	// c1.AddFunc("* * * * * * ", func() {
+// 	// fmt.Println("------c1------")
+// 	// })
+// 	// c1.Run()
+
+// 	//Sleep 阻塞
+// 	// c2 = cron.New(cron.WithSeconds())
+// 	// c2.AddFunc("* * * * * * ", func() {
+// 	// 	fmt.Println("------c2------")
+// 	// })
+// 	// c2.Start()
+// 	// time.Sleep(time.Second * 5)
+
+// 	//WaitGroup 阻塞 ,可用
+// 	// defer wg.Done()
+// 	// wg.Add(1)
+// 	// c2 = cron.New(cron.WithSeconds())
+// 	// c2.AddFunc("* * * * * * ", func() {
+// 	// 	fmt.Println("------c3------")
+// 	// })
+// 	// c2.Start()
+// 	// wg.Wait()
+
+// 	//自定义，携程处理，该方法报错fatal error: all goroutines are asleep - deadlock!
+// 	// defer wg.Done()
+// 	// wg.Add(1)
+// 	// go startTasks()
+// 	// wg.Wait()
+
+// 	//协程，可用
+// 	go startTasks2()
+// 	select {}
+// }
+
+// // func startTasks() {
+// // 	// task := NewGoogleRewiewTask()
+// // 	defer wg.Done()
+// // 	fmt.Println("------c4------")
+// // }
+
+// func startTasks2() {
+// 	c2 = cron.New(cron.WithSeconds())
+// 	id, err := c2.AddFunc("* * * * * * ", func() {
+// 		fmt.Println("------c5------")
+// 	})
+// 	if err != nil {
+
+// 	}
+// 	fmt.Println("id is ", id)
+
+// 	task := tasks.NewGoogleRewiewTask()
+// 	id2, err2 := c2.AddJob("* * * * * * ", task)
+// 	if err2 != nil {
+
+// 	}
+// 	fmt.Println("id2 is ", id2)
+// 	c2.Start()
+
+// }

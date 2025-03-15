@@ -1,0 +1,38 @@
+// package main
+
+// import (
+// 	"fmt"
+
+// 	"cronServer/tasks"
+
+// 	"github.com/robfig/cron/v3"
+// )
+
+// var c *cron.Cron
+
+// func main() {
+// 	go startTasks()
+// 	select {}
+// }
+
+// func startTasks() {
+
+// 	c = cron.New(cron.WithSeconds())
+
+// 	task := tasks.NewGoogleRewiewTask()
+// 	startTaskItem("* * * * * * ", task)
+
+// 	task2 := tasks.NewAppleReviewTask()
+// 	startTaskItem("* * * * * * ", task2)
+// }
+
+// func startTaskItem(spec string, cmd cron.Job) int {
+// 	id2, err := c.AddJob(spec, cmd)
+// 	if err != nil {
+// 		fmt.Println("Error is ", err.Error())
+// 		return -1
+// 	}
+// 	fmt.Println("ID is ", id2)
+// 	c.Start()
+// 	return int(id2)
+// }
