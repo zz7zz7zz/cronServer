@@ -118,7 +118,7 @@ func startTasks(platform string, key string) {
 		taskMap[key] = id
 	} else if platform == "ios" {
 		task := tasks.NewAppleReviewTask()
-		id2 := startTaskItem("* * * * * * ", task)
+		id2 := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id2
 	}
 }
