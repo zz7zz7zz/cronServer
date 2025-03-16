@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"cronServer/database"
 	"cronServer/tasks"
 
 	"github.com/robfig/cron/v3"
@@ -21,6 +22,8 @@ var taskMap = make(map[string]cron.EntryID)
 func main() {
 	// go startTasks()
 	// select {}
+
+	database.InitDb()
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {
@@ -51,7 +54,7 @@ func main() {
 		key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
 		_, flag := taskMap[key]
 		if !flag {
-			startTasks()
+			startTasks(platform, key)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
@@ -59,7 +62,7 @@ func main() {
 			"platform": platform,
 			"key":      key,
 			"status":   "审核通过",
-			"cron":     ternary(flag, "已经在任务中 ", "首次添加"),
+			"cron":     ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
 		})
 	})
 
@@ -79,24 +82,24 @@ func main() {
 			"pkg":      pkg,
 			"platform": platform,
 			"status":   "审核通过",
-			"cron":     ternary(flag, "移除成功 ", "未添加任务"),
+			"cron":     ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
 		})
 	})
 
 	r.Run()
 }
 
-func startTasks() {
-
+func startTasks(platform string, key string) {
 	cr = cron.New(cron.WithSeconds())
-
-	task := tasks.NewGoogleRewiewTask()
-	id := startTaskItem("* * * * * * ", task)
-	taskMap["android_2.20.1_com.inhobichat.hobichat"] = id
-
-	task2 := tasks.NewAppleReviewTask()
-	id2 := startTaskItem("* * * * * * ", task2)
-	taskMap["ios_2.20.1_com.inhobichat.hobichat"] = id2
+	if platform == "android" {
+		task := tasks.NewGoogleRewiewTask()
+		id := startTaskItem("* * * * * * ", task)
+		taskMap[key] = id
+	} else if platform == "ios" {
+		task := tasks.NewAppleReviewTask()
+		id2 := startTaskItem("* * * * * * ", task)
+		taskMap[key] = id2
+	}
 }
 
 func startTaskItem(spec string, cmd cron.Job) cron.EntryID {
