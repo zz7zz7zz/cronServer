@@ -25,6 +25,9 @@ func (t *AppleReviewTask) Run() {
 	version = strings.ReplaceAll(version, "version", "")
 	version = strings.TrimSpace(version)
 	fmt.Printf("当前版本: %s\n", version)
+	if version == "2.21.0" {
+
+	}
 }
 
 const (
