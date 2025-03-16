@@ -26,6 +26,19 @@ func main() {
 
 	database.InitDb()
 
+	appleReviewRecords := database.GetList("", "", "", 0, 1)
+	//自动开启以下任务
+	for _, record := range appleReviewRecords {
+		if record.TaskStatus == 1 {
+			key := fmt.Sprintf("%s_%s_%s", record.Platform, record.Ver, record.Pkg)
+			_, flag := taskMap[key]
+			if !flag {
+				fmt.Println("自动开启任务 ", key)
+				startTasks(record.Platform, key)
+			}
+		}
+	}
+
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {
 	// 	c.JSON(http.StatusOK, gin.H{
@@ -45,7 +58,7 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
 			return
 		}
-		appleReviewRecords := database.GetList(platform, ver, pkg, status)
+		appleReviewRecords := database.GetList(platform, ver, pkg, status, 0)
 		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 
@@ -59,6 +72,7 @@ func main() {
 		_, flag := taskMap[key]
 		if !flag {
 			startTasks(platform, key)
+			database.Insert(platform, ver, pkg, 0, 1)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
@@ -80,6 +94,7 @@ func main() {
 		if flag {
 			delete(taskMap, key)
 			cr.Remove(value)
+			database.Update(platform, ver, pkg, 3)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
