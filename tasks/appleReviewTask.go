@@ -1,9 +1,11 @@
 package tasks
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 type AppleReviewTask struct {
@@ -15,37 +17,32 @@ func NewAppleReviewTask() *AppleReviewTask {
 }
 
 func (t *AppleReviewTask) Run() {
-	fmt.Println("------Apple------")
-	version, err := getVersionViaAppFollow()
+	version, err := scrapeAppStore()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		fmt.Println("Apple Error:", err)
 	}
-
-	fmt.Println("Version:", version)
+	version = strings.ToLower(version)
+	version = strings.ReplaceAll(version, "version", "")
+	version = strings.TrimSpace(version)
+	fmt.Printf("当前版本: %s\n", version)
 }
 
-func getVersionViaAppFollow() (string, error) {
-	// url := "https://api.appfollow.io/version?app_id=id1596875621&country=us&device=iphone"
-	// resp, err := http.Get(url)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.appfollow.io/apps/app?apps_id=com.inhobichat.hobichat", nil)
-	if err != nil {
-		return "", err
-	}
+const (
+	appStoreURL = "https://apps.apple.com/app/id1596875621" // 替换为你的应用 App Store URL
+)
 
-	req.SetBasicAuth("AppFollow-966-2b3da05ee", "")
-	resp, err := client.Do(req)
+func scrapeAppStore() (string, error) {
+	resp, err := http.Get(appStoreURL)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
-	var result struct {
-		Version string `json:"version"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
 		return "", err
 	}
-	return result.Version, nil
+
+	version := doc.Find(".whats-new__latest__version").Text()
+	return version, nil
 }

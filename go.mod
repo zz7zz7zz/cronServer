@@ -4,8 +4,11 @@ go 1.23.4
 
 require github.com/robfig/cron/v3 v3.0.1
 
+require github.com/andybalholm/cascadia v1.3.3 // indirect
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/bytedance/sonic v1.13.1 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
