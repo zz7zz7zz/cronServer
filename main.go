@@ -24,6 +24,8 @@ func main() {
 	// go startTasks()
 	// select {}
 
+	// webhook.SendTextMessage("", fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", "android", "1.0.0", "com.inhobchat.hobicat", "GooglePlay"))
+
 	database.InitDb()
 
 	appleReviewRecords := database.GetList("", "", "", 0, 1)
