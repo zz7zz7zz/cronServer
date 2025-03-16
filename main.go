@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"cronServer/database"
 	"cronServer/tasks"
@@ -37,12 +38,15 @@ func main() {
 		ver := c.Query("ver")
 		pkg := c.Query("pkg")
 		platform := c.Query("platform")
-		c.JSON(http.StatusOK, gin.H{
-			"ver":      ver,
-			"pkg":      pkg,
-			"platform": platform,
-			"status":   "审核通过",
-		})
+		statusStr := c.DefaultQuery("status", "0")
+		status, err := strconv.Atoi(statusStr)
+		if err != nil {
+			// 参数无效时的处理逻辑（如返回错误响应）
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
+			return
+		}
+		appleReviewRecords := database.GetList(platform, ver, pkg, status)
+		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 
 	//
