@@ -14,25 +14,35 @@ const (
 
 // Google Stroe Review Task
 type GpReviewTask struct {
+	ReviewTask
 }
 
-func NewGpRewiewTask() *GpReviewTask {
-	t := &GpReviewTask{}
+func NewGpRewiewTask(ver string, pkg string, platform string) *GpReviewTask {
+	t := &GpReviewTask{
+		ReviewTask: ReviewTask{
+			Ver:      ver,
+			Pkg:      pkg,
+			Platform: platform,
+		}}
 	return t
 }
 
 func (t *GpReviewTask) Run() {
 	fmt.Println("------Google------")
-	version, err := scrapePlayStore()
+	version, err := scrapePlayStore(t.Pkg)
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
 	} else {
-		fmt.Printf("当前版本: %s\n", version)
+		if version == t.Pkg {
+			fmt.Println("版本一致，无需更新")
+		} else {
+			fmt.Println("版本不一致，需要更新")
+		}
 	}
 }
 
-func scrapePlayStore() (string, error) {
-	url := fmt.Sprintf(playStoreURL, "com.inhobichat.hobichat")
+func scrapePlayStore(pkg string) (string, error) {
+	url := fmt.Sprintf(playStoreURL, pkg)
 	// 发送 HTTP 请求
 	resp, err := http.Get(url)
 	if err != nil {

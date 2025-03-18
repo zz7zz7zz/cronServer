@@ -10,24 +10,32 @@ import (
 
 // Apple Stroe Review Task
 type AsReviewTask struct {
+	ReviewTask
 }
 
-func NewAsReviewTask() *AsReviewTask {
-	t := &AsReviewTask{}
+func NewAsReviewTask(ver string, pkg string, platform string) *AsReviewTask {
+	t := &AsReviewTask{
+		ReviewTask: ReviewTask{
+			Ver:      ver,
+			Pkg:      pkg,
+			Platform: platform,
+		}}
 	return t
 }
 
 func (t *AsReviewTask) Run() {
-	version, err := scrapeAppStore()
+	fmt.Println("------Apple------")
+	version, err := scrapeAppStore(t.Pkg)
 	if err != nil {
 		fmt.Println("Apple Error:", err)
 	}
 	version = strings.ToLower(version)
 	version = strings.ReplaceAll(version, "version", "")
 	version = strings.TrimSpace(version)
-	fmt.Printf("当前版本: %s\n", version)
-	if version == "2.21.0" {
-
+	if version == t.Pkg {
+		fmt.Println("版本一致，无需更新")
+	} else {
+		fmt.Println("版本不一致，需要更新")
 	}
 }
 
@@ -35,8 +43,8 @@ const (
 	appStoreURL = "https://apps.apple.com/app/id%s" // 替换为你的应用 App Store URL
 )
 
-func scrapeAppStore() (string, error) {
-	url := fmt.Sprintf(appStoreURL, "1596875621")
+func scrapeAppStore(pkg string) (string, error) {
+	url := fmt.Sprintf(appStoreURL, pkg)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err

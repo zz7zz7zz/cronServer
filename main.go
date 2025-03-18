@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cronServer/database"
+	"cronServer/db"
 	"cronServer/routers"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	database.InitDb()
+	db.InitDb()
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {

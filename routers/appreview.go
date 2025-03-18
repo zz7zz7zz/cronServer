@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"cronServer/database"
+	"cronServer/db"
 	"cronServer/tasks"
 	"fmt"
 	"net/http"
@@ -22,7 +22,7 @@ func InitAppreview(group *gin.RouterGroup) {
 
 	// webhook.SendTextMessage("", fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", "android", "1.0.0", "com.inhobchat.hobicat", "GooglePlay"))
 
-	appleReviewRecords := database.GetList("", "", "", 0, 1)
+	appleReviewRecords := db.GetList("", "", "", 0, 1)
 	//自动开启以下任务
 	for _, record := range appleReviewRecords {
 		if record.TaskStatus == 1 {
@@ -30,7 +30,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			_, flag := taskMap[key]
 			if !flag {
 				fmt.Println("自动开启任务 ", key)
-				startTasks(record.Platform, key)
+				startTasks(record.Ver, record.Pkg, record.Platform, key)
 			}
 		}
 	}
@@ -49,7 +49,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
 			return
 		}
-		appleReviewRecords := database.GetList(platform, ver, pkg, status, 0)
+		appleReviewRecords := db.GetList(platform, ver, pkg, status, 0)
 		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 
@@ -62,8 +62,8 @@ func InitAppreview(group *gin.RouterGroup) {
 		key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
 		_, flag := taskMap[key]
 		if !flag {
-			startTasks(platform, key)
-			database.Insert(platform, ver, pkg, 0, 1)
+			startTasks(ver, pkg, platform, key)
+			db.Insert(platform, ver, pkg, 0, 1)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
@@ -85,7 +85,7 @@ func InitAppreview(group *gin.RouterGroup) {
 		if flag {
 			delete(taskMap, key)
 			cr.Remove(value)
-			database.Update(platform, ver, pkg, 3)
+			db.Update(platform, ver, pkg, 3)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
@@ -97,14 +97,14 @@ func InitAppreview(group *gin.RouterGroup) {
 	})
 }
 
-func startTasks(platform string, key string) {
+func startTasks(ver string, pkg string, platform string, key string) {
 	cr = cron.New(cron.WithSeconds())
 	if platform == "android" {
-		task := tasks.NewGpRewiewTask()
+		task := tasks.NewGpRewiewTask(ver, pkg, platform)
 		id := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id
 	} else if platform == "ios" {
-		task := tasks.NewAsReviewTask()
+		task := tasks.NewAsReviewTask(ver, pkg, platform)
 		id2 := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id2
 	}
