@@ -1,6 +1,8 @@
 package webhook
 
-func NotifyReviewComplete(key string, content string) {
-	//登录账号
-	//打开审核开关
+type ServerWebHook struct {
+}
+
+func (s ServerWebHook) sendTextMessage() {
+
 }
