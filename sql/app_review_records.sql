@@ -1,7 +1,7 @@
 CREATE TABLE `app_review_records` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '唯一主键ID（自增）',
   `ver` varchar(64) NOT NULL COMMENT '应用版本号（格式如 1.2.0）',
-  `pkg` varchar(255) NOT NULL COMMENT '应用包名（如 com.example.app）',
+  `pkg` varchar(255) NOT NULL COMMENT '应用包名（Android是包名，如com.example.app；Ios是应用落地页id字符后面那一串数字 如id1234567890）',
   `platform` varchar(32) NOT NULL COMMENT '平台类型（iOS/Android/Web）',
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '审核状态（0:待审, 1:通过, 2:拒绝）',
   `time_stamp` int(11) NOT NULL COMMENT '记录时间戳（Unix秒级）',

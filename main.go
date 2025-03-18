@@ -113,11 +113,11 @@ func main() {
 func startTasks(platform string, key string) {
 	cr = cron.New(cron.WithSeconds())
 	if platform == "android" {
-		task := tasks.NewGoogleRewiewTask()
+		task := tasks.NewGpRewiewTask()
 		id := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id
 	} else if platform == "ios" {
-		task := tasks.NewAppleReviewTask()
+		task := tasks.NewAsReviewTask()
 		id2 := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id2
 	}

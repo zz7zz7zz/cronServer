@@ -8,15 +8,16 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type AppleReviewTask struct {
+// Apple Stroe Review Task
+type AsReviewTask struct {
 }
 
-func NewAppleReviewTask() *AppleReviewTask {
-	t := &AppleReviewTask{}
+func NewAsReviewTask() *AsReviewTask {
+	t := &AsReviewTask{}
 	return t
 }
 
-func (t *AppleReviewTask) Run() {
+func (t *AsReviewTask) Run() {
 	version, err := scrapeAppStore()
 	if err != nil {
 		fmt.Println("Apple Error:", err)
@@ -31,11 +32,12 @@ func (t *AppleReviewTask) Run() {
 }
 
 const (
-	appStoreURL = "https://apps.apple.com/app/id1596875621" // 替换为你的应用 App Store URL
+	appStoreURL = "https://apps.apple.com/app/id%s" // 替换为你的应用 App Store URL
 )
 
 func scrapeAppStore() (string, error) {
-	resp, err := http.Get(appStoreURL)
+	url := fmt.Sprintf(appStoreURL, "1596875621")
+	resp, err := http.Get(url)
 	if err != nil {
 		return "", err
 	}

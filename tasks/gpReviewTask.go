@@ -9,18 +9,19 @@ import (
 )
 
 const (
-	playStoreURL = "https://play.google.com/store/apps/details?id=com.inhobichat.hobichat" // 替换为你的应用 Play Store URL
+	playStoreURL = "https://play.google.com/store/apps/details?id=%s" // 替换为你的应用 Play Store URL
 )
 
-type GoogleReviewTask struct {
+// Google Stroe Review Task
+type GpReviewTask struct {
 }
 
-func NewGoogleRewiewTask() *GoogleReviewTask {
-	t := &GoogleReviewTask{}
+func NewGpRewiewTask() *GpReviewTask {
+	t := &GpReviewTask{}
 	return t
 }
 
-func (t *GoogleReviewTask) Run() {
+func (t *GpReviewTask) Run() {
 	fmt.Println("------Google------")
 	version, err := scrapePlayStore()
 	if err != nil {
@@ -31,8 +32,9 @@ func (t *GoogleReviewTask) Run() {
 }
 
 func scrapePlayStore() (string, error) {
+	url := fmt.Sprintf(playStoreURL, "com.inhobichat.hobichat")
 	// 发送 HTTP 请求
-	resp, err := http.Get(playStoreURL)
+	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("请求失败: %v", err)
 	}
@@ -56,9 +58,9 @@ func scrapePlayStore() (string, error) {
 
 	// 提取版本信息
 	versions := extractVersions(html)
-	fmt.Println("提取到的版本号：")
+
 	for _, v := range versions {
-		fmt.Println(v)
+		fmt.Printf("提取到版本号：%s\n", v)
 	}
 
 	if len(versions) == 0 {
