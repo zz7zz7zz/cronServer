@@ -10,7 +10,7 @@ import (
 type EnterpriseWechat struct {
 }
 
-func (w EnterpriseWechat) onWebhook() {
+func (w EnterpriseWechat) OnWebHook() {
 	key := "替换为你的企业微信机器人 Key"
 	content := fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", "android", "1.0.0", "com.inhobchat.hobicat", "GooglePlay")
 	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+key, "application/json", strings.NewReader(`{"msgtype": "text", "text": {"content": "`+content+`","mentioned_list":["@all"]}}`))

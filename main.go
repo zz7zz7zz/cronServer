@@ -1,8 +1,7 @@
 package main
 
 import (
-	"cronServer/db"
-	"cronServer/routers"
+	"cronServer/webhook"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +11,10 @@ import (
 
 func main() {
 
-	db.InitDb()
+	hook := webhook.ServerWebHook{}
+	hook.OnWebHook()
+
+	// db.InitDb()
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {
@@ -20,7 +22,7 @@ func main() {
 	// 		"message": "pong",
 	// 	})
 	// })
-	routers.InitRouters(r)
+	// routers.InitRouters(r)
 
 	r.Run()
 }
