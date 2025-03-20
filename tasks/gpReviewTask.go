@@ -38,6 +38,7 @@ func (t *GpReviewTask) Run() {
 			hook.OnWebHook(t.appReviewRecord)
 			database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
 			database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
+			StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
 		} else {
 			fmt.Println("版本不一致，需要更新")
 		}

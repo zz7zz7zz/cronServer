@@ -2,37 +2,25 @@ package routers
 
 import (
 	"cronServer/database"
-	db "cronServer/database"
-	"cronServer/models"
 	"cronServer/tasks"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/robfig/cron/v3"
 )
 
-var cr *cron.Cron
-
-var taskMap = make(map[string]cron.EntryID)
-
 func InitAppreview(group *gin.RouterGroup) {
-
-	// go startTasks()
-	// select {}
-
-	// webhook.SendTextMessage("", fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", "android", "1.0.0", "com.inhobchat.hobicat", "GooglePlay"))
 
 	appleReviewRecords := database.GetList("", "", "", 0, 1)
 	//自动开启以下任务
 	for _, record := range appleReviewRecords {
 		if record.TaskStatus == 1 {
 			key := fmt.Sprintf("%s_%s_%s", record.Platform, record.Ver, record.Pkg)
-			_, flag := taskMap[key]
+			_, flag := tasks.GPendingTasks[key]
 			if !flag {
 				fmt.Println("自动开启任务 ", key)
-				startTasks(&record, key)
+				tasks.StartTasks(&record, key)
 			}
 		}
 	}
@@ -61,19 +49,14 @@ func InitAppreview(group *gin.RouterGroup) {
 		ver := c.Query("ver")
 		platform := c.Query("platform")
 
-		key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
-		_, flag := taskMap[key]
-		if !flag {
-			startTasks(&models.AppReviewRecord{Pkg: pkg, Ver: ver, Platform: platform}, key)
-			database.Insert(platform, ver, pkg, 0, 1)
-		}
+		flag := tasks.StartTask(ver, pkg, platform)
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
-			"key":      key,
+			"key":      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
 			"status":   "start",
-			"cron":     ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
+			"cron":     tasks.Ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
 		})
 	})
 
@@ -82,50 +65,14 @@ func InitAppreview(group *gin.RouterGroup) {
 		ver := c.Query("ver")
 		pkg := c.Query("pkg")
 		platform := c.Query("platform")
-		key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
-		value, flag := taskMap[key]
-		if flag {
-			delete(taskMap, key)
-			cr.Remove(value)
-			db.UpdateTaskStatus(platform, ver, pkg, 3)
-		}
+
+		flag := tasks.StopTask(ver, pkg, platform)
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
 			"status":   "stop",
-			"cron":     ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
+			"cron":     tasks.Ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
 		})
 	})
-}
-
-func startTasks(appReviewRecord *models.AppReviewRecord, key string) {
-	cr = cron.New(cron.WithSeconds())
-	if appReviewRecord.Platform == "android" {
-		task := tasks.NewGpRewiewTask(appReviewRecord)
-		id := startTaskItem("10 * * * * * ", task)
-		taskMap[key] = id
-	} else if appReviewRecord.Platform == "ios" {
-		task := tasks.NewAsReviewTask(appReviewRecord)
-		id2 := startTaskItem("10 * * * * * ", task)
-		taskMap[key] = id2
-	}
-}
-
-func startTaskItem(spec string, cmd cron.Job) cron.EntryID {
-	id2, err := cr.AddJob(spec, cmd)
-	if err != nil {
-		fmt.Println("Error is ", err.Error())
-		return -1
-	}
-	fmt.Println("ID is ", id2)
-	cr.Start()
-	return id2
-}
-
-func ternary(b bool, valueIfTrue, valueIfFalse string) string {
-	if b {
-		return valueIfTrue
-	}
-	return valueIfFalse
 }

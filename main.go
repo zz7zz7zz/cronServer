@@ -2,6 +2,7 @@ package main
 
 import (
 	"cronServer/config"
+	"cronServer/database"
 	"cronServer/models"
 	"cronServer/tasks"
 	"strconv"
@@ -15,7 +16,10 @@ import (
 func main() {
 
 	config.InitConfig()
-	// database.InitDb()
+	database.InitDb()
+
+	// go startTasks()
+	// select {}
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {

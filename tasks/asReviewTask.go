@@ -41,6 +41,7 @@ func (t *AsReviewTask) Run() {
 		hook.OnWebHook(t.appReviewRecord)
 		database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
 		database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
+		StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
 	} else {
 		fmt.Print("版本不一致，需要更新\n", t.appReviewRecord.Ver, version)
 	}
