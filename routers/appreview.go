@@ -87,7 +87,7 @@ func InitAppreview(group *gin.RouterGroup) {
 		if flag {
 			delete(taskMap, key)
 			cr.Remove(value)
-			db.Update(platform, ver, pkg, 3)
+			db.UpdateTaskStatus(platform, ver, pkg, 3)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,

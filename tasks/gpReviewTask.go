@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"cronServer/database"
 	"cronServer/models"
 	"cronServer/webhook"
 	"fmt"
@@ -35,6 +36,8 @@ func (t *GpReviewTask) Run() {
 			fmt.Println("版本一致，无需更新")
 			hook := &webhook.ServerWebHook{}
 			hook.OnWebHook(t.appReviewRecord)
+			database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
+			database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
 		} else {
 			fmt.Println("版本不一致，需要更新")
 		}

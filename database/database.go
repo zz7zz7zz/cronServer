@@ -124,7 +124,7 @@ func Insert(platform string, ver string, pkg string, status int, taskstatus int)
 // 	return nil
 // }
 
-func Update(platform string, ver string, pkg string, taskstatus int) error {
+func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus int) error {
 	if platform == "" || ver == "" || pkg == "" {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
@@ -132,6 +132,28 @@ func Update(platform string, ver string, pkg string, taskstatus int) error {
 	result := DB.Model(&models.AppReviewRecord{}).
 		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
 		Update("task_status", taskstatus)
+
+	// 检查是否有错误
+	if result.Error != nil {
+		return fmt.Errorf("更新失败: %v", result.Error)
+	}
+
+	// 检查是否有记录被更新
+	if result.RowsAffected == 0 {
+		return errors.New("没有符合条件的记录被更新")
+	}
+
+	return nil
+}
+
+func UpdateStatus(platform string, ver string, pkg string, status int) error {
+	if platform == "" || ver == "" || pkg == "" {
+		return fmt.Errorf("platform/ver/pkg 参数不可为空")
+	}
+	// 查找符合条件的记录
+	result := DB.Model(&models.AppReviewRecord{}).
+		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
+		Update("status", status)
 
 	// 检查是否有错误
 	if result.Error != nil {
