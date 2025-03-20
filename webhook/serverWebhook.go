@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
 )
 
@@ -24,15 +22,15 @@ func (s ServerWebHook) OnWebHook() {
 	fmt.Println("Step 1: ", token)
 
 	//添加版本
-	code, err := versionAdd(token, "2.21.4")
-	if err != nil {
+	code, err := versionAdd(token, "2.21.88")
+	if err != nil || code != 200 && code != 1021 {
 		fmt.Println("添加版本失败:", err)
 		return
 	}
 	fmt.Println("Step 2: ", code)
 
 	//设置状态
-	code2, err2 := versioncontrol(token, 58)
+	code2, err2 := versioncontrol(token, 59)
 	if err2 != nil {
 		fmt.Println("设置状态失败:", err2)
 		return
@@ -84,16 +82,16 @@ func getToken() (string, error) {
 func versionAdd(token string, version string) (int, error) {
 	// 构造请求数据
 	requestData := map[string]interface{}{
-		"verno":         version,
-		"Authorization": "Bearer " + token,
+		"verno": version,
 	}
 
 	// 构造请求头
 	headers := map[string]string{
-		// "Content-Type":  "application/x-www-form-urlencoded",
+		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	response, err := PostJSON("http://system-api.dev.moyuvedio.com/app/version/add", headers, requestData)
+
+	response, err := PostJSON("http://melo-testbackend.moyuvedio.com/mq/app/version/add", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -104,9 +102,15 @@ func versionAdd(token string, version string) (int, error) {
 		return -1, fmt.Errorf("字段类型错误")
 	}
 
-	fmt.Println("code: ", code)
 	ret, ok := code.(int)
-	if !ok {
+	if ok {
+		return ret, nil
+	}
+
+	ret2, ok2 := code.(float64)
+	if ok2 {
+		ret = int(ret2) // 显式转换为int
+	} else {
 		return -1, fmt.Errorf("最终值类型错误")
 	}
 
@@ -116,7 +120,7 @@ func versionAdd(token string, version string) (int, error) {
 func versioncontrol(token string, id int) (int, error) {
 	// 构造请求数据
 	requestData := map[string]interface{}{
-		"id":            58,
+		"id":            id,
 		"control[1][1]": 1,
 		"control[1][2]": 0,
 		"control[1][3]": 1,
@@ -127,9 +131,10 @@ func versioncontrol(token string, id int) (int, error) {
 
 	// 发送 POST 请求
 	headers := map[string]string{
+		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	response, err := PostJSON2("http://system-api.dev.moyuvedio.com/app/version/control", headers, requestData)
+	response, err := PostJSON("http://melo-testbackend.moyuvedio.com/mq/app/version/control", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -160,6 +165,7 @@ func versioncontrol(token string, id int) (int, error) {
 //	result: 解析后的 JSON 数据 (map[string]interface{})
 //	err:    错误信息
 func PostJSON(apiUrl string, headers map[string]string, data interface{}) (result map[string]interface{}, err error) {
+	fmt.Printf("--------------------------\n")
 	// 1. 序列化请求数据为 JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -178,7 +184,6 @@ func PostJSON(apiUrl string, headers map[string]string, data interface{}) (resul
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败: %v", err)
 	}
-	// req.Header.Set("Content-Type", "application/json")
 	for key, value := range headers {
 		req.Header.Set(key, value) // 添加自定义请求头
 		fmt.Println("key:", key, " value:", value)
@@ -199,61 +204,8 @@ func PostJSON(apiUrl string, headers map[string]string, data interface{}) (resul
 
 	// 5. 读取并解析响应 JSON
 	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("读取响应体失败: %v", err)
-	}
 
-	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, fmt.Errorf("解析 JSON 失败: %v", err)
-	}
-
-	return result, nil
-}
-
-func PostJSON2(apiUrl string, headers map[string]string, data interface{}) (result map[string]interface{}, err error) {
-	// 1. 序列化请求数据为 JSON
-	// jsonData, err := json.Marshal(data)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("序列化 JSON 失败: %v", err)
-	// }
-
-	// 2. 创建 HTTP 请求
-
-	params := url.Values{}
-	for key, value := range data.(map[string]interface{}) {
-		params.Add(key, value.(string))
-	}
-
-	fmt.Println("req_body: ", params.Encode())
-	resp, err := http.Post(apiUrl, "application/x-www-form-urlencoded", strings.NewReader(params.Encode()))
-
-	// body := bytes.NewBuffer(jsonData)
-	// req, err := http.NewRequest("POST", apiUrl, body)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("创建请求失败: %v", err)
-	// }
-	// // req.Header.Set("Content-Type", "application/json")
-	// for key, value := range headers {
-	// 	req.Header.Set(key, value) // 添加自定义请求头
-	// 	fmt.Println("key:", key, " value:", value)
-	// }
-
-	// // 3. 发送请求（带超时控制）
-	// client := &http.Client{Timeout: 10 * time.Second}
-	// resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("请求发送失败: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// 4. 检查 HTTP 状态码
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("服务器返回非 200 状态码: %d", resp.StatusCode)
-	}
-
-	// 5. 读取并解析响应 JSON
-	body, err := io.ReadAll(resp.Body)
-	fmt.Println("rsp_body: ", string(body))
+	fmt.Printf("resp: %v\n", string(body))
 	if err != nil {
 		return nil, fmt.Errorf("读取响应体失败: %v", err)
 	}
