@@ -3,6 +3,7 @@ package main
 import (
 	"cronServer/config"
 	"cronServer/database"
+	"cronServer/routers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,7 @@ func main() {
 	// 		"message": "pong",
 	// 	})
 	// })
-	// routers.InitRouters(r)
+	routers.InitRouters(r)
 
 	r.Run()
 }

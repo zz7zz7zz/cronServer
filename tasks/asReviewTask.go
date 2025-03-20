@@ -1,6 +1,8 @@
 package tasks
 
 import (
+	"cronServer/models"
+	"cronServer/webhook"
 	"fmt"
 	"net/http"
 	"strings"
@@ -34,6 +36,8 @@ func (t *AsReviewTask) Run() {
 	version = strings.TrimSpace(version)
 	if version == t.Pkg {
 		fmt.Println("版本一致，无需更新")
+		hook := &webhook.ServerWebHook{}
+		hook.OnWebHook(&models.AppReviewRecord{Ver: t.Ver, Pkg: t.Pkg, Platform: t.Platform})
 	} else {
 		fmt.Println("版本不一致，需要更新")
 	}
