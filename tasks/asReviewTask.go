@@ -26,10 +26,14 @@ func NewAsReviewTask(ver string, pkg string, platform string) *AsReviewTask {
 }
 
 func (t *AsReviewTask) Run() {
-	fmt.Println("------Apple------")
+	fmt.Println("------Apple start------", t)
 	version, err := scrapeAppStore(t.Pkg)
+	version = strings.ReplaceAll(version, "Version", "")
+	version = strings.TrimSpace(version)
 	if err != nil {
 		fmt.Println("Apple Error:", err)
+	} else {
+		fmt.Println("------Apple version------", version)
 	}
 	version = strings.ToLower(version)
 	version = strings.ReplaceAll(version, "version", "")
@@ -41,6 +45,7 @@ func (t *AsReviewTask) Run() {
 	} else {
 		fmt.Println("版本不一致，需要更新")
 	}
+	fmt.Println("------Apple end------")
 }
 
 const (
