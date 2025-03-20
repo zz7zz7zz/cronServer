@@ -3,6 +3,7 @@ package webhook
 import (
 	"bytes"
 	"cronServer/config"
+	"cronServer/models"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 type ServerWebHook struct {
 }
 
-func (s ServerWebHook) OnWebHook() {
+func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	//1.登录管理后台
 	token, err := getToken()
 	if err != nil {
@@ -65,7 +66,7 @@ func (s ServerWebHook) OnWebHook() {
 
 	if code3 == 200 {
 		hook := EnterpriseWechat{}
-		hook.OnWebHook()
+		hook.OnWebHook(appReviewRecord)
 	}
 }
 
