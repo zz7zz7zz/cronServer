@@ -57,13 +57,14 @@ func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	}
 	fmt.Println("Id: ", id)
 	//2.3设置状态
-	code3, err3 := versioncontrol(token, id)
+	code3, err3 := versioncontrol(token, id, appReviewRecord.Platform)
 	if err3 != nil {
 		fmt.Println("设置状态失败:", err3)
 		return
 	}
 	fmt.Println("Step 4: ", code3)
 
+	//2.4发送消息
 	if code3 == 200 {
 		hook := EnterpriseWechat{}
 		hook.OnWebHook(appReviewRecord)
@@ -149,17 +150,18 @@ func versionAdd(token string, version string) (int, error) {
 	return ret, nil
 }
 
-func versioncontrol(token string, id int) (int, error) {
+func versioncontrol(token string, id int, platform string) (int, error) {
+	//TODO 要与原来的状态进行合并
 	// 构造请求数据
 	requestData := map[string]interface{}{
 		"id":      id,
 		"control": [2][3]int{{1, 0, 1}, {1, 0, 1}},
-		// "control[1][1]": "1",
-		// "control[1][2]": "0",
-		// "control[1][3]": "1",
-		// "control[2][1]": "1",
-		// "control[2][2]": "0",
-		// "control[2][3]": "1",
+	}
+	if platform == "ios" {
+		requestData = map[string]interface{}{
+			"id":      id,
+			"control": [2][3]int{{0, 1, 0}, {0, 1, 0}},
+		}
 	}
 
 	// 发送 POST 请求
