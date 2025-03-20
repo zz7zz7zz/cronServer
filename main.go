@@ -14,7 +14,6 @@ import (
 func main() {
 
 	config.InitConfig()
-
 	database.InitDb()
 
 	r := gin.Default()
@@ -24,6 +23,9 @@ func main() {
 	// 	})
 	// })
 	routers.InitRouters(r)
+
+	// task := tasks.NewAsReviewTask("2.21.6", "1596875621", "ios")
+	// task.Run()
 
 	r.Run()
 }
