@@ -79,7 +79,7 @@ func getToken() (string, error) {
 		"Content-Type": "application/json",
 	}
 	// 发送 POST 请求
-	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/user/login", headers, requestData)
+	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.Referer+"/user/login", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return "", err
