@@ -4,6 +4,7 @@ import (
 	"cronServer/config"
 	"cronServer/database"
 	"cronServer/routers"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,5 @@ func main() {
 
 	// task := tasks.NewAsReviewTask("2.21.6", "1596875621", "ios")
 	// task.Run()
-
-	r.Run()
+	r.Run(":" + strconv.Itoa(config.GConfig.Server.Port))
 }
