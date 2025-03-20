@@ -29,5 +29,5 @@ func (w EnterpriseWechat) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	}
 
 	// 打印响应内容
-	fmt.Println("响应内容:", string(body))
+	fmt.Println("EnterpriseWechat 响应内容:", string(body))
 }

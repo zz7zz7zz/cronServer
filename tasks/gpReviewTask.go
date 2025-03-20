@@ -30,12 +30,12 @@ func NewGpRewiewTask(ver string, pkg string, platform string) *GpReviewTask {
 }
 
 func (t *GpReviewTask) Run() {
-	fmt.Println("------Google------")
+	fmt.Println("------Google start------", t)
 	version, err := scrapePlayStore(t.Pkg)
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
 	} else {
-		if version == t.Pkg {
+		if version == t.Ver {
 			fmt.Println("版本一致，无需更新")
 			hook := &webhook.ServerWebHook{}
 			hook.OnWebHook(&models.AppReviewRecord{Ver: t.Ver, Pkg: t.Pkg, Platform: t.Platform})
@@ -43,6 +43,7 @@ func (t *GpReviewTask) Run() {
 			fmt.Println("版本不一致，需要更新")
 		}
 	}
+	fmt.Println("------Google end------")
 }
 
 func scrapePlayStore(pkg string) (string, error) {
