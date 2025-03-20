@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cronServer/webhook"
+	"cronServer/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,10 +11,12 @@ import (
 
 func main() {
 
-	hook := webhook.ServerWebHook{}
-	hook.OnWebHook()
+	config.InitConfig()
 
-	// db.InitDb()
+	// hook := webhook.ServerWebHook{}
+	// hook.OnWebHook()
+
+	// database.InitDb()
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {

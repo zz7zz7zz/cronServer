@@ -1,7 +1,8 @@
 package routers
 
 import (
-	"cronServer/db"
+	"cronServer/database"
+	db "cronServer/database"
 	"cronServer/tasks"
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ func InitAppreview(group *gin.RouterGroup) {
 
 	// webhook.SendTextMessage("", fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", "android", "1.0.0", "com.inhobchat.hobicat", "GooglePlay"))
 
-	appleReviewRecords := db.GetList("", "", "", 0, 1)
+	appleReviewRecords := database.GetList("", "", "", 0, 1)
 	//自动开启以下任务
 	for _, record := range appleReviewRecords {
 		if record.TaskStatus == 1 {
@@ -49,7 +50,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
 			return
 		}
-		appleReviewRecords := db.GetList(platform, ver, pkg, status, 0)
+		appleReviewRecords := database.GetList(platform, ver, pkg, status, 0)
 		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 
@@ -63,7 +64,7 @@ func InitAppreview(group *gin.RouterGroup) {
 		_, flag := taskMap[key]
 		if !flag {
 			startTasks(ver, pkg, platform, key)
-			db.Insert(platform, ver, pkg, 0, 1)
+			database.Insert(platform, ver, pkg, 0, 1)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,

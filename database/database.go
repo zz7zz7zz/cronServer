@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"errors"
@@ -8,13 +8,15 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"cronServer/config"
 	"cronServer/models"
 )
 
 var DB *gorm.DB
 
 func InitDb() {
-	dsn := "melo:jpYU7CJ5t36e@tcp(172.18.26.11:3306)/melo_appreview?charset=utf8mb4&parseTime=True&loc=Local"
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.GConfig.Database.User, config.GConfig.Database.Password, config.GConfig.Database.Host, config.GConfig.Database.Port, config.GConfig.Database.Name)
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

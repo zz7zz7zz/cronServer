@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"bytes"
+	"cronServer/config"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -78,7 +79,7 @@ func getToken() (string, error) {
 		"Content-Type": "application/json",
 	}
 	// 发送 POST 请求
-	response, err := PostJSON("POST", "http://system-api.dev.moyuvedio.com/user/login", headers, requestData)
+	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/user/login", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return "", err
@@ -121,7 +122,7 @@ func versionAdd(token string, version string) (int, error) {
 		"Authorization": "Bearer " + token,
 	}
 
-	response, err := PostJSON("POST", "http://melo-testbackend.moyuvedio.com/mq/app/version/add", headers, requestData)
+	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/mq/app/version/add", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -165,7 +166,7 @@ func versioncontrol(token string, id int) (int, error) {
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	response, err := PostJSON("POST", "http://melo-testbackend.moyuvedio.com/mq/app/version/control", headers, requestData)
+	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/mq/app/version/control", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -198,7 +199,7 @@ func versionList(token string) (*VersionList, error) {
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	body, statusCode, err := GetJSON("http://melo-testbackend.moyuvedio.com/mq/app/version/lists?page=1&size=20", headers)
+	body, statusCode, err := GetJSON(config.GConfig.Webhook.OurServer.URL+"/mq/app/version/lists?page=1&size=20", headers)
 	fmt.Printf("Status: %d\nResponse: %s\n", statusCode, body)
 	if err != nil {
 		fmt.Println("请求失败:", statusCode, err)

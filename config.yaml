@@ -1,0 +1,16 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+database:
+  Host: 
+  port: 
+  name: ""
+  user: ""
+  password: ""
+
+webhook:
+  wechat:
+    key: ""
+  ourserver:
+    url: ""
