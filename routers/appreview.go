@@ -3,6 +3,7 @@ package routers
 import (
 	"cronServer/database"
 	db "cronServer/database"
+	"cronServer/models"
 	"cronServer/tasks"
 	"fmt"
 	"net/http"
@@ -31,7 +32,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			_, flag := taskMap[key]
 			if !flag {
 				fmt.Println("自动开启任务 ", key)
-				startTasks(record.Ver, record.Pkg, record.Platform, key)
+				startTasks(&record, key)
 			}
 		}
 	}
@@ -63,7 +64,7 @@ func InitAppreview(group *gin.RouterGroup) {
 		key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
 		_, flag := taskMap[key]
 		if !flag {
-			startTasks(ver, pkg, platform, key)
+			startTasks(&models.AppReviewRecord{Pkg: pkg, Ver: ver, Platform: platform}, key)
 			database.Insert(platform, ver, pkg, 0, 1)
 		}
 		c.JSON(http.StatusOK, gin.H{
@@ -71,7 +72,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			"pkg":      pkg,
 			"platform": platform,
 			"key":      key,
-			"status":   "审核通过",
+			"status":   "start",
 			"cron":     ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
 		})
 	})
@@ -92,20 +93,20 @@ func InitAppreview(group *gin.RouterGroup) {
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
-			"status":   "审核通过",
+			"status":   "stop",
 			"cron":     ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
 		})
 	})
 }
 
-func startTasks(ver string, pkg string, platform string, key string) {
+func startTasks(appReviewRecord *models.AppReviewRecord, key string) {
 	cr = cron.New(cron.WithSeconds())
-	if platform == "android" {
-		task := tasks.NewGpRewiewTask(ver, pkg, platform)
+	if appReviewRecord.Platform == "android" {
+		task := tasks.NewGpRewiewTask(appReviewRecord)
 		id := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id
-	} else if platform == "ios" {
-		task := tasks.NewAsReviewTask(ver, pkg, platform)
+	} else if appReviewRecord.Platform == "ios" {
+		task := tasks.NewAsReviewTask(appReviewRecord)
 		id2 := startTaskItem("10 * * * * * ", task)
 		taskMap[key] = id2
 	}

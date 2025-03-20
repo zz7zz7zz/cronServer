@@ -16,29 +16,25 @@ const (
 
 // Google Stroe Review Task
 type GpReviewTask struct {
-	ReviewTask
+	appReviewRecord *models.AppReviewRecord
 }
 
-func NewGpRewiewTask(ver string, pkg string, platform string) *GpReviewTask {
+func NewGpRewiewTask(appReviewRecord *models.AppReviewRecord) *GpReviewTask {
 	t := &GpReviewTask{
-		ReviewTask: ReviewTask{
-			Ver:      ver,
-			Pkg:      pkg,
-			Platform: platform,
-		}}
+		appReviewRecord: appReviewRecord}
 	return t
 }
 
 func (t *GpReviewTask) Run() {
 	fmt.Println("------Google start------", t)
-	version, err := scrapePlayStore(t.Pkg)
+	version, err := scrapePlayStore(t.appReviewRecord.Pkg)
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
 	} else {
-		if version == t.Ver {
+		if version == t.appReviewRecord.Ver {
 			fmt.Println("版本一致，无需更新")
 			hook := &webhook.ServerWebHook{}
-			hook.OnWebHook(&models.AppReviewRecord{Ver: t.Ver, Pkg: t.Pkg, Platform: t.Platform})
+			hook.OnWebHook(t.appReviewRecord)
 		} else {
 			fmt.Println("版本不一致，需要更新")
 		}

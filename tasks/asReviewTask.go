@@ -12,22 +12,18 @@ import (
 
 // Apple Stroe Review Task
 type AsReviewTask struct {
-	ReviewTask
+	appReviewRecord *models.AppReviewRecord
 }
 
-func NewAsReviewTask(ver string, pkg string, platform string) *AsReviewTask {
+func NewAsReviewTask(appReviewRecord *models.AppReviewRecord) *AsReviewTask {
 	t := &AsReviewTask{
-		ReviewTask: ReviewTask{
-			Ver:      ver,
-			Pkg:      pkg,
-			Platform: platform,
-		}}
+		appReviewRecord: appReviewRecord}
 	return t
 }
 
 func (t *AsReviewTask) Run() {
 	fmt.Println("------Apple start------", t)
-	version, err := scrapeAppStore(t.Pkg)
+	version, err := scrapeAppStore(t.appReviewRecord.Pkg)
 	version = strings.ReplaceAll(version, "Version", "")
 	version = strings.TrimSpace(version)
 	if err != nil {
@@ -38,12 +34,12 @@ func (t *AsReviewTask) Run() {
 	version = strings.ToLower(version)
 	version = strings.ReplaceAll(version, "version", "")
 	version = strings.TrimSpace(version)
-	if version == t.Ver {
+	if version == t.appReviewRecord.Ver {
 		fmt.Println("版本一致，无需更新")
 		hook := &webhook.ServerWebHook{}
-		hook.OnWebHook(&models.AppReviewRecord{Ver: t.Ver, Pkg: t.Pkg, Platform: t.Platform})
+		hook.OnWebHook(t.appReviewRecord)
 	} else {
-		fmt.Print("版本不一致，需要更新\n", t.Ver, version)
+		fmt.Print("版本不一致，需要更新\n", t.appReviewRecord.Ver, version)
 	}
 	fmt.Println("------Apple end------")
 }
