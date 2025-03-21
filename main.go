@@ -29,11 +29,11 @@ func main() {
 	// })
 	// routers.InitRouters(r)
 
-	task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: "ios"})
-	task.Run()
-
-	// task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: "android"})
+	// task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: "ios"})
 	// task.Run()
+
+	task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: "android"})
+	task.Run()
 
 	r.Run(":" + strconv.Itoa(config.GConfig.Server.Port))
 }

@@ -28,7 +28,7 @@ func NewGpRewiewTask(appReviewRecord *models.AppReviewRecord) *GpReviewTask {
 
 func (t *GpReviewTask) Run() {
 	fmt.Println("------Google start------", t)
-	version, err := scrapePlayStore(t.appReviewRecord.Pkg)
+	version, updateTime, err := scrapePlayStore(t.appReviewRecord.Pkg)
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
 	} else {
@@ -40,25 +40,25 @@ func (t *GpReviewTask) Run() {
 			database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
 			StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
 		} else {
-			fmt.Println("版本不一致，需要更新")
+			fmt.Println("版本不一致，需要更新", version, updateTime)
 		}
 	}
 	fmt.Println("------Google end------")
 }
 
-func scrapePlayStore(pkg string) (string, error) {
+func scrapePlayStore(pkg string) (string, string, error) {
 	url := fmt.Sprintf(playStoreURL, pkg)
 	// 发送 HTTP 请求
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", fmt.Errorf("请求失败: %v", err)
+		return "", "", fmt.Errorf("请求失败: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// 解析 HTML
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("解析 HTML 失败: %v", err)
+		return "", "", fmt.Errorf("解析 HTML 失败: %v", err)
 	}
 
 	html := doc.Text()
@@ -79,11 +79,13 @@ func scrapePlayStore(pkg string) (string, error) {
 	}
 
 	if len(versions) == 0 {
-		return "", fmt.Errorf("未找到版本信息")
+		return "", "", fmt.Errorf("未找到版本信息")
 	}
 
+	updateTime := extractUpdateTime(html)
+	fmt.Println("updateTime:", updateTime)
 	// 清理版本字符串
-	return versions[0], nil
+	return versions[0], updateTime, nil
 }
 
 func extractVersions(html string) []string {
@@ -103,4 +105,20 @@ func extractVersions(html string) []string {
 	}
 
 	return versions
+}
+
+func extractUpdateTime(html string) string {
+	// 编译正则表达式，匹配 [A,B]]] 结构
+	re := regexp.MustCompile(`\[(\d{10}),\d{9}\]{3}`)
+
+	// 查找所有匹配项
+	matches := re.FindAllStringSubmatch(html, -1)
+
+	// 提取每个匹配中的 A 值
+	for _, match := range matches {
+		if len(match) >= 2 {
+			return match[1]
+		}
+	}
+	return ""
 }
