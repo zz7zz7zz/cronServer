@@ -24,13 +24,13 @@ func NewAsReviewTask(appReviewRecord *models.AppReviewRecord) *AsReviewTask {
 
 func (t *AsReviewTask) Run() {
 	fmt.Println("------Apple start------", t)
-	version, err := scrapeAppStore(t.appReviewRecord.Pkg)
+	version, updateTime, err := scrapeAppStore(t.appReviewRecord.Pkg)
 	version = strings.ReplaceAll(version, "Version", "")
 	version = strings.TrimSpace(version)
 	if err != nil {
 		fmt.Println("Apple Error:", err)
 	} else {
-		fmt.Println("------Apple version------", version)
+		fmt.Println("------Apple version------", version, updateTime)
 	}
 	version = strings.ToLower(version)
 	version = strings.ReplaceAll(version, "version", "")
@@ -52,19 +52,22 @@ const (
 	appStoreURL = "https://apps.apple.com/app/id%s" // 替换为你的应用 App Store URL
 )
 
-func scrapeAppStore(pkg string) (string, error) {
+func scrapeAppStore(pkg string) (string, string, error) {
 	url := fmt.Sprintf(appStoreURL, pkg)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer resp.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	version := doc.Find(".whats-new__latest__version").Text()
-	return version, nil
+
+	time := doc.Find("time[data-test-we-datetime]").Text()
+
+	return version, time, nil
 }
