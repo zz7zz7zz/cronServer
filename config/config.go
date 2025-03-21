@@ -29,6 +29,8 @@ type WebhookWechatConfig struct {
 }
 
 type WebhookOurServerConfig struct {
-	Referer string `yaml:"referer"`
-	URL     string `yaml:"url"`
+	Referer  string `yaml:"referer"`
+	URL      string `yaml:"url"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }

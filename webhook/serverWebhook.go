@@ -74,8 +74,8 @@ func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 func getToken() (string, error) {
 	// 构造请求数据
 	requestData := map[string]interface{}{
-		"username": "admin",
-		"password": "123456", // 复杂数据可以序列化为JSON字符串
+		"username": config.GConfig.Webhook.OurServer.Username,
+		"password": config.GConfig.Webhook.OurServer.Password, // 复杂数据可以序列化为JSON字符串
 	}
 	headers := map[string]string{
 		"Content-Type": "application/json",

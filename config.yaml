@@ -15,3 +15,5 @@ webhook:
   ourserver:
     referer:  ""
     url: ""
+    username: ""
+    password: ""
