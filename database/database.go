@@ -47,9 +47,9 @@ func GetList(platform string, ver string, pkg string, status int, taskstatus int
 		query = query.Where("task_status = ?", taskstatus)
 	}
 	// 添加倒序排序（按时间戳或ID倒序）
-	// query = query.Order("time_stamp DESC") // 或 "id DESC"
+	// query = query.Order("task_create_ts DESC") // 或 "id DESC"
 	// 修改排序逻辑：先按 ver 倒序，再按 time_stamp 倒序
-	query = query.Order("ver DESC, time_stamp DESC")
+	query = query.Order("ver DESC, task_create_ts DESC")
 
 	query.Find(&ret)
 	return ret
