@@ -5,6 +5,7 @@ import (
 	"cronServer/database"
 	"cronServer/models"
 	"fmt"
+	"time"
 
 	"github.com/robfig/cron/v3"
 )
@@ -41,7 +42,7 @@ func StartTask(ver string, pkg string, platform string) bool {
 	key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
 	_, flag := GPendingTasks[key]
 	if !flag {
-		StartTasks(&models.AppReviewRecord{Pkg: pkg, Ver: ver, Platform: platform}, key)
+		StartTasks(&models.AppReviewRecord{Pkg: pkg, Ver: ver, Platform: platform, TaskCreateTs: int(time.Now().Unix())}, key)
 		database.Insert(platform, ver, pkg, 0, 1)
 	}
 	return flag
