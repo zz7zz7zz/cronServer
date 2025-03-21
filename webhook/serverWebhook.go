@@ -191,7 +191,6 @@ func versioncontrol(token string, id int, vd *VersionDetail, platform string) (i
 		"id": id,
 	}
 	if platform == constant.Ios {
-		// requestData["control"] = [2][3]int{{vd.Data.Control["1"]["1"], 1, vd.Data.Control["1"]["3"]}, {vd.Data.Control["2"]["1"], 1, vd.Data.Control["2"]["3"]}}
 		requestData["control"] = map[string]map[string]int{
 			"1": {
 				"1": vd.Data.Control["1"]["1"],
