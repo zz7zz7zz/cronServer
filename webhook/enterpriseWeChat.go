@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"cronServer/config"
+	"cronServer/constant"
 	"cronServer/models"
 	"fmt"
 	"io"
@@ -13,7 +14,11 @@ type EnterpriseWechat struct {
 }
 
 func (w EnterpriseWechat) OnWebHook(appReviewRecord *models.AppReviewRecord) {
-	content := fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：%s\n结果：审核通过", appReviewRecord.Platform, appReviewRecord.Ver, appReviewRecord.Pkg, appReviewRecord.Channel)
+	url := fmt.Sprintf(constant.AppStoreURL, appReviewRecord.Pkg)
+	if appReviewRecord.Platform == constant.Android {
+		url = fmt.Sprintf(constant.PlayStoreURL, appReviewRecord.Pkg)
+	}
+	content := fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：\n%s链接：%s\n结果：审核通过", appReviewRecord.Platform, appReviewRecord.Ver, appReviewRecord.Pkg, appReviewRecord.Channel, url)
 	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+config.GConfig.Webhook.Wechat.Key, "application/json", strings.NewReader(`{"msgtype": "text", "text": {"content": "`+content+`","mentioned_list":["@all"]}}`))
 	if err != nil {
 		fmt.Println("请求失败:", err)

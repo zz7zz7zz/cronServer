@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/models"
 	"cronServer/webhook"
@@ -11,10 +12,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-)
-
-const (
-	playStoreURL = "https://play.google.com/store/apps/details?id=%s" // 替换为你的应用 Play Store URL
 )
 
 // Google Stroe Review Task
@@ -60,7 +57,7 @@ func (t *GpReviewTask) Run() {
 }
 
 func scrapePlayStore(pkg string) (string, int64, error) {
-	url := fmt.Sprintf(playStoreURL, pkg)
+	url := fmt.Sprintf(constant.PlayStoreURL, pkg)
 	// 发送 HTTP 请求
 	resp, err := http.Get(url)
 	if err != nil {

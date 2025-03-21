@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/models"
 	"fmt"
@@ -14,11 +15,11 @@ var GPendingTasks = make(map[string]cron.EntryID)
 
 func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
 	GCron = cron.New(cron.WithSeconds())
-	if appReviewRecord.Platform == "android" {
+	if appReviewRecord.Platform == constant.Android {
 		task := NewGpRewiewTask(appReviewRecord)
 		id := innerStartTask("10 * * * * * ", task)
 		GPendingTasks[key] = id
-	} else if appReviewRecord.Platform == "ios" {
+	} else if appReviewRecord.Platform == constant.Ios {
 		task := NewAsReviewTask(appReviewRecord)
 		id2 := innerStartTask("10 * * * * * ", task)
 		GPendingTasks[key] = id2

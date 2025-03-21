@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/models"
 	"cronServer/webhook"
@@ -60,12 +61,8 @@ func (t *AsReviewTask) Run() {
 	fmt.Println("------Apple end------", t.appReviewRecord.Ver, version)
 }
 
-const (
-	appStoreURL = "https://apps.apple.com/app/id%s" // 替换为你的应用 App Store URL
-)
-
 func scrapeAppStore(pkg string) (string, int64, error) {
-	url := fmt.Sprintf(appStoreURL, pkg)
+	url := fmt.Sprintf(constant.AppStoreURL, pkg)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", 0, err

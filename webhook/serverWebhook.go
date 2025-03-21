@@ -3,9 +3,11 @@ package webhook
 import (
 	"bytes"
 	"cronServer/config"
+	"cronServer/constant"
 	"cronServer/models"
 	"encoding/json"
 	"fmt"
+	_ "go/constant"
 	"io"
 	"net/http"
 	"time"
@@ -157,7 +159,7 @@ func versioncontrol(token string, id int, platform string) (int, error) {
 		"id":      id,
 		"control": [2][3]int{{1, 0, 1}, {1, 0, 1}},
 	}
-	if platform == "ios" {
+	if platform == constant.Ios {
 		requestData = map[string]interface{}{
 			"id":      id,
 			"control": [2][3]int{{0, 1, 0}, {0, 1, 0}},
