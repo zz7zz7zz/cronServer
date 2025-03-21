@@ -6,7 +6,9 @@ import (
 	"cronServer/webhook"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -30,44 +32,85 @@ func (t *AsReviewTask) Run() {
 	if err != nil {
 		fmt.Println("Apple Error:", err)
 	} else {
+
+		// 转换为 UTC 时间
+		tUTC := time.Unix(updateTime, 0).UTC()
+		fmt.Println("UTC 时间:", tUTC.Format("2006年01月02日 15:04:05"))
+
+		// 转换为本地时区（如 Asia/Shanghai）
+		loc, _ := time.LoadLocation("Asia/Shanghai")
+		tLocal := time.Unix(updateTime, 0).In(loc)
+		fmt.Println("本地时间:", tLocal.Format("2006年01月02日 15:04:05"))
+
 		fmt.Println("------Apple version------", version, updateTime)
 	}
 	version = strings.ToLower(version)
 	version = strings.ReplaceAll(version, "version", "")
 	version = strings.TrimSpace(version)
 	if version == t.appReviewRecord.Ver {
-		fmt.Println("版本一致，无需更新")
+		fmt.Println("检测到版本审核-成功")
 		hook := &webhook.ServerWebHook{}
 		hook.OnWebHook(t.appReviewRecord)
 		database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
 		database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
 		StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
 	} else {
-		fmt.Print("版本不一致，需要更新\n", t.appReviewRecord.Ver, version)
+		fmt.Println("检测到版本审核-失败")
 	}
-	fmt.Println("------Apple end------")
+	fmt.Println("------Apple end------", t.appReviewRecord.Ver, version)
 }
 
 const (
 	appStoreURL = "https://apps.apple.com/app/id%s" // 替换为你的应用 App Store URL
 )
 
-func scrapeAppStore(pkg string) (string, string, error) {
+func scrapeAppStore(pkg string) (string, int64, error) {
 	url := fmt.Sprintf(appStoreURL, pkg)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", "", err
+		return "", 0, err
 	}
 	defer resp.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return "", "", err
+		return "", 0, err
 	}
+
+	// wferr := os.WriteFile("output.txt", []byte(doc.Text()), 0644)
+	// if wferr != nil {
+	// 	fmt.Println("文件写入失败:", err)
+	// 	return "", "", wferr
+	// }
 
 	version := doc.Find(".whats-new__latest__version").Text()
 
-	time := doc.Find("time[data-test-we-datetime]").Text()
+	//解析出的数据是这样：Mar 19, 2025
+	// time := doc.Find("time[data-test-we-datetime]").Text()
+	time := extractUpdateTimeAs(doc.Text())
 
 	return version, time, nil
+}
+
+func extractUpdateTimeAs(html string) int64 {
+	// 步骤 1: 正则匹配提取时间字符串
+	re := regexp.MustCompile(`"releaseTimestamp\\":\\"([^"]+)\\"`)
+	matches := re.FindStringSubmatch(html)
+	if len(matches) < 2 {
+		fmt.Println("错误: 未找到 releaseTimestamp 时间字段")
+		return 0
+	}
+	timeStr := matches[1]
+
+	// 步骤 2: 解析时间字符串
+	// 注意布局必须严格对应 "2006-01-02T15:04:05Z"
+	t, err := time.Parse(time.RFC3339, timeStr) // RFC3339 布局即 "2006-01-02T15:04:05Z07:00"
+	if err != nil {
+		fmt.Println("时间解析失败:", err)
+		return 0
+	}
+
+	// 步骤 3: 转换为秒级时间戳
+	timestamp := t.Unix()
+	return timestamp
 }

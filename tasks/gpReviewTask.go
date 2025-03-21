@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -32,33 +34,44 @@ func (t *GpReviewTask) Run() {
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
 	} else {
-		if version == t.appReviewRecord.Ver {
-			fmt.Println("版本一致，无需更新")
-			hook := &webhook.ServerWebHook{}
-			hook.OnWebHook(t.appReviewRecord)
-			database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
-			database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
-			StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
-		} else {
-			fmt.Println("版本不一致，需要更新", version, updateTime)
-		}
+		// 转换为 UTC 时间
+		tUTC := time.Unix(updateTime, 0).UTC()
+		fmt.Println("UTC 时间:", tUTC.Format("2006年01月02日 15:04:05"))
+
+		// 转换为本地时区（如 Asia/Shanghai）
+		loc, _ := time.LoadLocation("Asia/Shanghai")
+		tLocal := time.Unix(updateTime, 0).In(loc)
+		fmt.Println("本地时间:", tLocal.Format("2006年01月02日 15:04:05"))
+
+		fmt.Println("------Google version------", version, updateTime)
 	}
-	fmt.Println("------Google end------")
+
+	if version == t.appReviewRecord.Ver {
+		fmt.Println("检测到版本审核-成功")
+		hook := &webhook.ServerWebHook{}
+		hook.OnWebHook(t.appReviewRecord)
+		database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
+		database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
+		StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
+	} else {
+		fmt.Println("检测到版本审核-失败")
+	}
+	fmt.Println("------Google end------", t.appReviewRecord.Ver, version)
 }
 
-func scrapePlayStore(pkg string) (string, string, error) {
+func scrapePlayStore(pkg string) (string, int64, error) {
 	url := fmt.Sprintf(playStoreURL, pkg)
 	// 发送 HTTP 请求
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", "", fmt.Errorf("请求失败: %v", err)
+		return "", 0, fmt.Errorf("请求失败: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// 解析 HTML
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return "", "", fmt.Errorf("解析 HTML 失败: %v", err)
+		return "", 0, fmt.Errorf("解析 HTML 失败: %v", err)
 	}
 
 	html := doc.Text()
@@ -79,7 +92,7 @@ func scrapePlayStore(pkg string) (string, string, error) {
 	}
 
 	if len(versions) == 0 {
-		return "", "", fmt.Errorf("未找到版本信息")
+		return "", 0, fmt.Errorf("未找到版本信息")
 	}
 
 	updateTime := extractUpdateTime(html)
@@ -107,7 +120,7 @@ func extractVersions(html string) []string {
 	return versions
 }
 
-func extractUpdateTime(html string) string {
+func extractUpdateTime(html string) int64 {
 	// 编译正则表达式，匹配 [A,B]]] 结构
 	re := regexp.MustCompile(`\[(\d{10}),\d{9}\]{3}`)
 
@@ -117,8 +130,14 @@ func extractUpdateTime(html string) string {
 	// 提取每个匹配中的 A 值
 	for _, match := range matches {
 		if len(match) >= 2 {
-			return match[1]
+			// return match[1]
+			num, err := strconv.ParseInt(match[1], 10, 64)
+			if err != nil {
+				fmt.Println("转换失败:", err)
+				return 0
+			}
+			return num
 		}
 	}
-	return ""
+	return 0
 }
