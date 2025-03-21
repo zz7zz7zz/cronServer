@@ -2,8 +2,8 @@ package main
 
 import (
 	"cronServer/config"
-	"cronServer/models"
-	"cronServer/tasks"
+	"cronServer/database"
+	"cronServer/routers"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,10 +15,7 @@ import (
 func main() {
 
 	config.InitConfig()
-	// database.InitDb()
-
-	// go startTasks()
-	// select {}
+	database.InitDb()
 
 	r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {
@@ -26,13 +23,17 @@ func main() {
 	// 		"message": "pong",
 	// 	})
 	// })
-	// routers.InitRouters(r)
+	routers.InitRouters(r)
 
-	task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: "ios"})
-	task.Run()
+	// task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: "ios"})
+	// task.Run()
 
 	// task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: "android"})
 	// task.Run()
 
 	r.Run(":" + strconv.Itoa(config.GConfig.Server.Port))
+
+	// 不退出
+	// go startTasks()
+	// select {}
 }
