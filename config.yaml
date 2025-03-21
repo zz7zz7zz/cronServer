@@ -13,4 +13,5 @@ webhook:
   wechat:
     key: ""
   ourserver:
+    referer:  ""
     url: ""
