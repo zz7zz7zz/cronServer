@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -26,7 +27,8 @@ func NewGpRewiewTask(appReviewRecord *models.AppReviewRecord) *GpReviewTask {
 }
 
 func (t *GpReviewTask) Run() {
-	fmt.Println("------Google start------", t)
+	now := time.Now()
+	fmt.Println("------Google start------", now.Format("2006-01-02 15:04:05"), t)
 	version, updateTime, err := scrapePlayStore(t.appReviewRecord.Pkg)
 	if err != nil {
 		fmt.Printf("抓取 Google Play 页面失败: %v", err)
@@ -43,7 +45,8 @@ func (t *GpReviewTask) Run() {
 		fmt.Println("------Google version------", version, updateTime)
 	}
 
-	if version == t.appReviewRecord.Ver {
+	cmpValue := strings.Compare(version, t.appReviewRecord.Ver)
+	if cmpValue == 0 {
 		fmt.Println("检测到版本审核-成功")
 		t.appReviewRecord.ApproveTs = int(updateTime)
 		hook := &webhook.ServerWebHook{}
@@ -52,7 +55,14 @@ func (t *GpReviewTask) Run() {
 		database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
 		StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
 	} else {
-		fmt.Println("检测到版本审核-失败")
+		if cmpValue == 1 {
+			fmt.Println("检测到版本审核-已有更新的版本，当前任务将忽略")
+			database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
+			database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
+			StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
+		} else {
+			fmt.Println("检测到版本审核-失败")
+		}
 	}
 	fmt.Println("------Google end------", t.appReviewRecord.Ver, version)
 }
