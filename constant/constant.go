@@ -6,3 +6,15 @@ const (
 	Android      = "android"
 	Ios          = "ios"
 )
+
+// 可添加枚举类型增强可读性（示例）
+type ReviewStatus int32
+
+const (
+	ReviewPending  ReviewStatus = 0
+	ReviewApproved ReviewStatus = 1
+	ReviewRejected ReviewStatus = 2
+)
+
+// 使用时进行类型转换
+// record.Status = int32(ReviewApproved)

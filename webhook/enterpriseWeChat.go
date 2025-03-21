@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type EnterpriseWechat struct {
@@ -18,7 +19,14 @@ func (w EnterpriseWechat) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	if appReviewRecord.Platform == constant.Android {
 		url = fmt.Sprintf(constant.PlayStoreURL, appReviewRecord.Pkg)
 	}
-	content := fmt.Sprintf("平台：%s\n版本：%s\n包名：%s\n渠道：\n%s链接：%s\n结果：审核通过", appReviewRecord.Platform, appReviewRecord.Ver, appReviewRecord.Pkg, appReviewRecord.Channel, url)
+
+	tUTCCreate := time.Unix(int64(appReviewRecord.TaskCreateTs), 0).UTC()
+	tUTCtUTCCreateStr := tUTCCreate.Format("2006年01月02日 15:04:05")
+
+	tUTCApprove := time.Unix(int64(appReviewRecord.ApproveTs), 0).UTC()
+	tUTCApproveStr := tUTCApprove.Format("2006年01月02日 15:04:05")
+
+	content := fmt.Sprintf("提醒：%s 审核通过\n版本：%s\n包名：%s\n渠道：\n%s链接：%s\n任务创建时间：%s\n审核通过时间：%s\n", appReviewRecord.Platform, appReviewRecord.Ver, appReviewRecord.Pkg, appReviewRecord.Channel, url, tUTCtUTCCreateStr, tUTCApproveStr)
 	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+config.GConfig.Webhook.Wechat.Key, "application/json", strings.NewReader(`{"msgtype": "text", "text": {"content": "`+content+`","mentioned_list":["@all"]}}`))
 	if err != nil {
 		fmt.Println("请求失败:", err)

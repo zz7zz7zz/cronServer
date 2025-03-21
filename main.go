@@ -2,11 +2,8 @@ package main
 
 import (
 	"cronServer/config"
-	"cronServer/constant"
 	"cronServer/database"
-	"cronServer/models"
 	"cronServer/routers"
-	"cronServer/tasks"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -31,8 +28,8 @@ func main() {
 	// task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: constant.Ios})
 	// task.Run()
 
-	task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: constant.Android})
-	task.Run()
+	// task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: constant.Android})
+	// task.Run()
 
 	r.Run(":" + strconv.Itoa(config.GConfig.Server.Port))
 

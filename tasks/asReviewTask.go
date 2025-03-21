@@ -50,6 +50,7 @@ func (t *AsReviewTask) Run() {
 	version = strings.TrimSpace(version)
 	if version == t.appReviewRecord.Ver {
 		fmt.Println("检测到版本审核-成功")
+		t.appReviewRecord.ApproveTs = int(updateTime)
 		hook := &webhook.ServerWebHook{}
 		hook.OnWebHook(t.appReviewRecord)
 		database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)

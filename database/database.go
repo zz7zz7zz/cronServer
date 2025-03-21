@@ -73,12 +73,12 @@ func Insert(platform string, ver string, pkg string, status int, taskstatus int)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// 创建新记录
 		newRecord := models.AppReviewRecord{
-			Platform:   platform,
-			Ver:        ver,
-			Pkg:        pkg,
-			Status:     status,
-			TimeStamp:  int(time.Now().Unix()), // 添加时间戳（根据字段类型调整）
-			TaskStatus: taskstatus,
+			Platform:     platform,
+			Ver:          ver,
+			Pkg:          pkg,
+			Status:       status,
+			TaskCreateTs: int(time.Now().Unix()), // 添加时间戳（根据字段类型调整）
+			TaskStatus:   taskstatus,
 		}
 
 		// 插入数据库
