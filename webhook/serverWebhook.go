@@ -10,6 +10,7 @@ import (
 	_ "go/constant"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -26,7 +27,7 @@ func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	fmt.Println("Step 1: ", token)
 
 	//2.1添加版本
-	var ver = "2.21.88"
+	var ver = appReviewRecord.Ver
 	code, err := versionAdd(token, ver)
 	if err != nil || code != 200 && code != 1021 {
 		fmt.Println("添加版本失败:", err)
@@ -58,16 +59,25 @@ func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 		}
 	}
 	fmt.Println("Id: ", id)
-	//2.3设置状态
-	code3, err3 := versioncontrol(token, id, appReviewRecord.Platform)
+
+	//2.3拉取状态
+	vd, err3 := versionDetail(token, id)
 	if err3 != nil {
 		fmt.Println("设置状态失败:", err3)
 		return
 	}
-	fmt.Println("Step 4: ", code3)
+	fmt.Println("Step 4: ", vd)
 
-	//2.4发送消息
-	if code3 == 200 {
+	//2.3设置状态
+	code4, err4 := versioncontrol(token, id, vd, appReviewRecord.Platform)
+	if err4 != nil {
+		fmt.Println("设置状态失败:", err4)
+		return
+	}
+	fmt.Println("Step 5: ", code4)
+
+	//2.5发送消息
+	if code4 == 200 {
 		hook := EnterpriseWechat{}
 		hook.OnWebHook(appReviewRecord)
 	}
@@ -152,17 +162,60 @@ func versionAdd(token string, version string) (int, error) {
 	return ret, nil
 }
 
-func versioncontrol(token string, id int, platform string) (int, error) {
+func versionDetail(token string, id int) (*VersionDetail, error) {
+
+	// 发送 POST 请求
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + token,
+	}
+	body, statusCode, err := GetJSON(config.GConfig.Webhook.OurServer.URL+"/mq/app/version/detail?id="+strconv.Itoa(id), headers)
+	fmt.Printf("Status: %d\nResponse: %s\n", statusCode, body)
+	if err != nil {
+		fmt.Println("请求失败:", statusCode, err)
+		return nil, err
+	}
+
+	var versionDetailet VersionDetail
+	if err := json.Unmarshal(body, &versionDetailet); err != nil {
+		return nil, fmt.Errorf("解析 JSON 失败: %v", err)
+	}
+
+	return &versionDetailet, nil
+}
+
+func versioncontrol(token string, id int, vd *VersionDetail, platform string) (int, error) {
 	//TODO 要与原来的状态进行合并
 	// 构造请求数据
 	requestData := map[string]interface{}{
-		"id":      id,
-		"control": [2][3]int{{1, 0, 1}, {1, 0, 1}},
+		"id": id,
 	}
 	if platform == constant.Ios {
-		requestData = map[string]interface{}{
-			"id":      id,
-			"control": [2][3]int{{0, 1, 0}, {0, 1, 0}},
+		// requestData["control"] = [2][3]int{{vd.Data.Control["1"]["1"], 1, vd.Data.Control["1"]["3"]}, {vd.Data.Control["2"]["1"], 1, vd.Data.Control["2"]["3"]}}
+		requestData["control"] = map[string]map[string]int{
+			"1": {
+				"1": vd.Data.Control["1"]["1"],
+				"2": 1,
+				"3": vd.Data.Control["1"]["3"],
+			},
+			"2": {
+				"1": vd.Data.Control["2"]["1"],
+				"2": 1,
+				"3": vd.Data.Control["2"]["3"],
+			},
+		}
+	} else if platform == constant.Android {
+		requestData["control"] = map[string]map[string]int{
+			"1": {
+				"1": 1,
+				"2": vd.Data.Control["1"]["2"],
+				"3": 1,
+			},
+			"2": {
+				"1": 1,
+				"2": vd.Data.Control["2"]["2"],
+				"3": 1,
+			},
 		}
 	}
 
