@@ -38,14 +38,14 @@ func innerStartTask(spec string, cmd cron.Job) cron.EntryID {
 	return id2
 }
 
-func StartTask(ver string, pkg string, platform string) bool {
+func StartTask(ver string, pkg string, platform string) (constant.ReviewStatus, constant.TaskStatus, error) {
 	key := fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
 	_, flag := GPendingTasks[key]
 	if !flag {
 		StartTasks(&models.AppReviewRecord{Pkg: pkg, Ver: ver, Platform: platform, TaskCreateTs: int(time.Now().Unix())}, key)
-		database.Insert(platform, ver, pkg, 0, 1)
+		return database.Insert(platform, ver, pkg, 0, 1)
 	}
-	return flag
+	return constant.ReviewPending, constant.TaskNotStart, nil
 }
 
 func StopTask(ver string, pkg string, platform string) bool {

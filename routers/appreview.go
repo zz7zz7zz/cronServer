@@ -50,14 +50,15 @@ func InitAppreview(group *gin.RouterGroup) {
 		ver := c.Query("ver")
 		platform := c.Query("platform")
 
-		flag := tasks.StartTask(ver, pkg, platform)
+		status, taskStatus, err := tasks.StartTask(ver, pkg, platform)
+		fmt.Print("status taskStatus err ", status, taskStatus, err)
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
 			"key":      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
 			"status":   "start",
-			"cron":     tasks.Ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
+			"cron":     tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功"),
 		})
 	})
 

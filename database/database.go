@@ -60,7 +60,7 @@ func GetList(platform string, ver string, pkg string, status constant.ReviewStat
 	return ret
 }
 
-func Insert(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) error {
+func Insert(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) (constant.ReviewStatus, constant.TaskStatus, error) {
 
 	iStatus := int(status)
 	iTaskStatus := int(taskstatus)
@@ -73,9 +73,9 @@ func Insert(platform string, ver string, pkg string, status constant.ReviewStatu
 	if result.Error == nil {
 		existingRecord.TaskStatus = iStatus
 		if err := DB.Save(&existingRecord).Error; err != nil {
-			return fmt.Errorf("更新失败: %v", err)
+			return constant.ReviewStatus(existingRecord.Status), constant.TaskStatus(existingRecord.TaskStatus), fmt.Errorf("更新失败: %v", err)
 		}
-		return nil
+		return constant.ReviewStatus(existingRecord.Status), constant.TaskStatus(existingRecord.TaskStatus), nil
 	}
 
 	// 3. 如果是"未找到记录"错误，继续插入新数据
@@ -92,13 +92,13 @@ func Insert(platform string, ver string, pkg string, status constant.ReviewStatu
 
 		// 插入数据库
 		if err := DB.Create(&newRecord).Error; err != nil {
-			return fmt.Errorf("插入失败: %v", err)
+			return constant.ReviewPending, constant.TaskNotStart, fmt.Errorf("插入失败: %v", err)
 		}
-		return nil
+		return constant.ReviewPending, constant.TaskNotStart, nil
 	}
 
 	// 4. 其他数据库错误（如连接问题）
-	return fmt.Errorf("查询失败: %v", result.Error)
+	return constant.ReviewError, constant.TaskError, fmt.Errorf("查询失败: %v", result.Error)
 }
 
 //若未创建联合唯一索引，OnConflict 将无法触发，导致重复插入

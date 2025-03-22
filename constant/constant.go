@@ -11,6 +11,7 @@ const (
 type ReviewStatus int
 
 const (
+	ReviewError    ReviewStatus = -1
 	ReviewPending  ReviewStatus = 0
 	ReviewApproved ReviewStatus = 1
 	ReviewRejected ReviewStatus = 2
@@ -18,11 +19,12 @@ const (
 )
 
 // 使用时进行类型转换
-// record.Status = int32(ReviewApproved)
+// record.Status = int(ReviewApproved)
 
 type TaskStatus int
 
 const (
+	TaskError    TaskStatus = -1
 	TaskNotStart TaskStatus = 0
 	TaskRunning  TaskStatus = 1
 	TaskFinish   TaskStatus = 2
@@ -30,4 +32,4 @@ const (
 )
 
 // 使用时进行类型转换
-// record.tastStatus = int32(Running)
+// record.tastStatus = int(Running)
