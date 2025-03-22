@@ -60,6 +60,29 @@ func GetList(platform string, ver string, pkg string, status constant.ReviewStat
 	return ret
 }
 
+func GetMaxVersionRecord(pkg, platform string) (*models.AppReviewRecord, error) {
+	var record models.AppReviewRecord
+
+	// 版本号分段排序逻辑
+	orderByExpr := `
+        CAST(SUBSTRING_INDEX(CONCAT(ver, '.0.0'), '.', 1) AS UNSIGNED) DESC,
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(ver, '.0.0'), '.', 2), '.', -1) AS UNSIGNED) DESC,
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(ver, '.0.0'), '.', 3), '.', -1) AS UNSIGNED) DESC
+    `
+
+	// 执行查询
+	err := DB.Model(&models.AppReviewRecord{}).
+		Where("pkg = ? AND platform = ?", pkg, platform).
+		Order(orderByExpr).
+		First(&record).
+		Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil // 无记录时不报错
+	}
+	return &record, err
+}
+
 func Insert(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) (constant.ReviewStatus, constant.TaskStatus, error) {
 
 	iStatus := int(status)

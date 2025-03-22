@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,15 +51,33 @@ func InitAppreview(group *gin.RouterGroup) {
 		ver := c.Query("ver")
 		platform := c.Query("platform")
 
+		appReviewRecord, err := database.GetMaxVersionRecord(pkg, platform)
+		maxVer := ""
+		if err == nil {
+			maxVer = appReviewRecord.Ver
+		}
+
 		status, taskStatus, err := tasks.StartTask(ver, pkg, platform)
-		fmt.Print("status taskStatus err ", status, taskStatus, err)
+		fmt.Print("status taskStatus err ", status, taskStatus, err, maxVer)
+
+		message := tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功")
+		if maxVer != "" {
+			cmpValue := strings.Compare(appReviewRecord.Ver, ver)
+			if cmpValue == 1 {
+				message = message + fmt.Sprintf("（已存在审核通过的更高版本%s，但是仍然为你执行相应的任务）", maxVer)
+			} else if cmpValue == 0 {
+				message = message + "（记录显示该版本已审核通过，但是仍然为你执行相应的任务）"
+			}
+
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
 			"key":      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
 			"status":   "start",
-			"cron":     tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功"),
+			"message":  message,
 		})
 	})
 
@@ -74,7 +93,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			"pkg":      pkg,
 			"platform": platform,
 			"status":   "stop",
-			"cron":     tasks.Ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
+			"message":  tasks.Ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
 		})
 	})
 }
