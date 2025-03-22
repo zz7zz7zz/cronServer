@@ -4,10 +4,10 @@ import (
 	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/tasks"
+	"cronServer/utils"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -62,7 +62,7 @@ func InitAppreview(group *gin.RouterGroup) {
 
 		message := tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功")
 		if maxVer != "" {
-			cmpValue := strings.Compare(appReviewRecord.Ver, ver)
+			cmpValue := utils.VersionCompare(appReviewRecord.Ver, ver)
 			if cmpValue == 1 {
 				message = message + fmt.Sprintf("（已存在审核通过的更高版本%s，但是仍然为你执行相应的任务）", maxVer)
 			} else if cmpValue == 0 {
