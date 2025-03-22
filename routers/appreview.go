@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/tasks"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 
 func InitAppreview(group *gin.RouterGroup) {
 
-	appleReviewRecords := database.GetList("", "", "", 0, 1)
+	appleReviewRecords := database.GetList("", "", "", constant.ReviewPending, constant.TaskRunning)
 	//自动开启以下任务
 	for _, record := range appleReviewRecords {
 		if record.TaskStatus == 1 {
@@ -39,7 +40,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
 			return
 		}
-		appleReviewRecords := database.GetList(platform, ver, pkg, status, 0)
+		appleReviewRecords := database.GetList(platform, ver, pkg, constant.ReviewStatus(status), constant.TaskNotStart)
 		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 

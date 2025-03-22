@@ -8,13 +8,26 @@ const (
 )
 
 // 可添加枚举类型增强可读性（示例）
-type ReviewStatus int32
+type ReviewStatus int
 
 const (
 	ReviewPending  ReviewStatus = 0
 	ReviewApproved ReviewStatus = 1
 	ReviewRejected ReviewStatus = 2
+	ReviewExpired  ReviewStatus = 3
 )
 
 // 使用时进行类型转换
 // record.Status = int32(ReviewApproved)
+
+type TaskStatus int
+
+const (
+	TaskNotStart TaskStatus = 0
+	TaskRunning  TaskStatus = 1
+	TaskFinish   TaskStatus = 2
+	TaskStop     TaskStatus = 3
+)
+
+// 使用时进行类型转换
+// record.tastStatus = int32(Running)

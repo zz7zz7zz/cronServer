@@ -8,6 +8,7 @@ database:
   name: melo_appreview
   user: melo
   password: jpYU7CJ5t36e
+  params: charset=utf8mb4&parseTime=True&loc=Local
 
 webhook:
   wechat:

@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"cronServer/config"
+	"cronServer/constant"
 	"cronServer/models"
 )
 
@@ -16,7 +17,7 @@ var DB *gorm.DB
 
 func InitDb() {
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.GConfig.Database.User, config.GConfig.Database.Password, config.GConfig.Database.Host, config.GConfig.Database.Port, config.GConfig.Database.Name)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", config.GConfig.Database.User, config.GConfig.Database.Password, config.GConfig.Database.Host, config.GConfig.Database.Port, config.GConfig.Database.Name, config.GConfig.Database.Params)
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -26,7 +27,9 @@ func InitDb() {
 	fmt.Println("Init DB Success")
 }
 
-func GetList(platform string, ver string, pkg string, status int, taskstatus int) []models.AppReviewRecord {
+func GetList(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) []models.AppReviewRecord {
+	iStatus := int(status)
+	iTaskStatus := int(taskstatus)
 	var ret []models.AppReviewRecord
 	query := DB.Model(&models.AppReviewRecord{})
 
@@ -40,11 +43,13 @@ func GetList(platform string, ver string, pkg string, status int, taskstatus int
 	if pkg != "" {
 		query = query.Where("pkg = ?", pkg)
 	}
-	if status != 0 { // 假设 status=0 表示“全部状态”
-		query = query.Where("status = ?", status)
+
+	if int(iStatus) != 0 { // 假设 status=0 表示“全部状态”
+		query = query.Where("status = ?", iStatus)
 	}
-	if taskstatus != 0 { // 假设 taskstatus=0 表示“全部状态”
-		query = query.Where("task_status = ?", taskstatus)
+
+	if iTaskStatus != 0 { // 假设 taskstatus=0 表示“全部状态”
+		query = query.Where("task_status = ?", iTaskStatus)
 	}
 	// 添加倒序排序（按时间戳或ID倒序）
 	// query = query.Order("task_create_ts DESC") // 或 "id DESC"
@@ -55,14 +60,18 @@ func GetList(platform string, ver string, pkg string, status int, taskstatus int
 	return ret
 }
 
-func Insert(platform string, ver string, pkg string, status int, taskstatus int) error {
+func Insert(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) error {
+
+	iStatus := int(status)
+	iTaskStatus := int(taskstatus)
+
 	// 1. 检查记录是否已存在
 	var existingRecord models.AppReviewRecord
 	result := DB.Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).First(&existingRecord)
 
 	// 2. 如果已存在，更新 taskstatus 字段
 	if result.Error == nil {
-		existingRecord.TaskStatus = taskstatus
+		existingRecord.TaskStatus = iStatus
 		if err := DB.Save(&existingRecord).Error; err != nil {
 			return fmt.Errorf("更新失败: %v", err)
 		}
@@ -76,9 +85,9 @@ func Insert(platform string, ver string, pkg string, status int, taskstatus int)
 			Platform:     platform,
 			Ver:          ver,
 			Pkg:          pkg,
-			Status:       status,
+			Status:       iStatus,
 			TaskCreateTs: int(time.Now().Unix()), // 添加时间戳（根据字段类型调整）
-			TaskStatus:   taskstatus,
+			TaskStatus:   iTaskStatus,
 		}
 
 		// 插入数据库
@@ -124,14 +133,15 @@ func Insert(platform string, ver string, pkg string, status int, taskstatus int)
 // 	return nil
 // }
 
-func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus int) error {
+func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus constant.TaskStatus) error {
+	iTaskStatus := int(taskstatus)
 	if platform == "" || ver == "" || pkg == "" {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
 	// 查找符合条件的记录
 	result := DB.Model(&models.AppReviewRecord{}).
 		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
-		Update("task_status", taskstatus)
+		Update("task_status", iTaskStatus)
 
 	// 检查是否有错误
 	if result.Error != nil {
@@ -146,14 +156,15 @@ func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus int) e
 	return nil
 }
 
-func UpdateStatus(platform string, ver string, pkg string, status int) error {
+func UpdateStatus(platform string, ver string, pkg string, status constant.ReviewStatus) error {
+	iStatus := int(status)
 	if platform == "" || ver == "" || pkg == "" {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
 	// 查找符合条件的记录
 	result := DB.Model(&models.AppReviewRecord{}).
 		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
-		Update("status", status)
+		Update("status", iStatus)
 
 	// 检查是否有错误
 	if result.Error != nil {

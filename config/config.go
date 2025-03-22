@@ -17,6 +17,7 @@ type DatabaseConfig struct {
 	Name     string `yaml:"name"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
+	Params   string `yaml:"params"`
 }
 
 type WebhookConfig struct {
