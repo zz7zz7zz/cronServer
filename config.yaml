@@ -1,20 +1,29 @@
 server:
-  host: "0.0.0.0"
-  port: 8080
+  host: 
+  port: 
 
 database:
-  host: 172.18.26.11
-  port: 3306
-  name: melo_appreview
-  user: melo
-  password: jpYU7CJ5t36e
-  params: charset=utf8mb4&parseTime=True&loc=Local
+  host: 
+  port: 
+  name: 
+  user: 
+  password: 
+  params: 
+
+redis:
+  host: 
+  port: 
+  auth: 
+
+es:
+  host: 
+  port: 
 
 webhook:
   wechat:
-    key: 7654a703-eba9-4ddd-92c1-f1f3afd89562
+    key: 
   ourserver:
-    referer: http://system-api.dev.moyuvedio.com
-    url: http://melo-testbackend.moyuvedio.com
-    username: admin
-    password: 123456
+    referer: 
+    url: 
+    username: 
+    password: 
