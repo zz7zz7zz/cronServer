@@ -40,8 +40,13 @@ func (t *AsReviewTask) Run() {
 		tUTC := time.Unix(updateTime, 0).UTC()
 		fmt.Println("UTC 时间:", tUTC.Format("2006年01月02日 15:04:05"))
 
-		// 转换为本地时区（如 Asia/Shanghai）
-		loc, _ := time.LoadLocation("Asia/Shanghai")
+		// 转换为本地时区（如 Asia/Shanghai）,会出现这个问题missing Location in call to Time.In
+		// loc, err := time.LoadLocation("Asia/Shanghai")
+		// if(err != nil){
+		// 	fmt.Println("Failed to load location:", err)
+		// }
+		loc := time.FixedZone("CST", 8*60*60) // 东八区，UTC+8
+
 		tLocal := time.Unix(updateTime, 0).In(loc)
 		fmt.Println("本地时间:", tLocal.Format("2006年01月02日 15:04:05"))
 
