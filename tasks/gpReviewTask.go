@@ -4,12 +4,12 @@ import (
 	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/models"
+	"cronServer/utils"
 	"cronServer/webhook"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -45,7 +45,7 @@ func (t *GpReviewTask) Run() {
 		fmt.Println("------Google version------", version, updateTime)
 	}
 
-	cmpValue := strings.Compare(version, t.appReviewRecord.Ver)
+	cmpValue := utils.VersionCompare(version, t.appReviewRecord.Ver)
 	if cmpValue == 0 {
 		fmt.Println("检测到版本审核-成功")
 		t.appReviewRecord.ApproveTs = int(updateTime)

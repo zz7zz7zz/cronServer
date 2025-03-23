@@ -1,8 +1,10 @@
 package routers
 
 import (
+	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/tasks"
+	"cronServer/utils"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,7 +14,7 @@ import (
 
 func InitAppreview(group *gin.RouterGroup) {
 
-	appleReviewRecords := database.GetList("", "", "", 0, 1)
+	appleReviewRecords := database.GetList("", "", "", constant.ReviewPending, constant.TaskRunning)
 	//自动开启以下任务
 	for _, record := range appleReviewRecords {
 		if record.TaskStatus == 1 {
@@ -39,7 +41,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status parameter"})
 			return
 		}
-		appleReviewRecords := database.GetList(platform, ver, pkg, status, 0)
+		appleReviewRecords := database.GetList(platform, ver, pkg, constant.ReviewStatus(status), constant.TaskNotStart)
 		c.JSON(http.StatusOK, appleReviewRecords)
 	})
 
@@ -49,14 +51,33 @@ func InitAppreview(group *gin.RouterGroup) {
 		ver := c.Query("ver")
 		platform := c.Query("platform")
 
-		flag := tasks.StartTask(ver, pkg, platform)
+		appReviewRecord, err := database.GetMaxVersionRecord(pkg, platform)
+		maxVer := ""
+		if err == nil {
+			maxVer = appReviewRecord.Ver
+		}
+
+		status, taskStatus, err := tasks.StartTask(ver, pkg, platform)
+		fmt.Print("status taskStatus err ", status, taskStatus, err, maxVer)
+
+		message := tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功")
+		if maxVer != "" {
+			cmpValue := utils.VersionCompare(appReviewRecord.Ver, ver)
+			if cmpValue == 1 {
+				message = message + fmt.Sprintf("（已存在审核通过的更高版本%s，但是仍然为你执行相应的任务）", maxVer)
+			} else if cmpValue == 0 {
+				message = message + "（记录显示该版本已审核通过，但是仍然为你执行相应的任务）"
+			}
+
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,
 			"platform": platform,
 			"key":      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
 			"status":   "start",
-			"cron":     tasks.Ternary(flag, "已存在相同任务 ", "启动-定时任务成功"),
+			"message":  message,
 		})
 	})
 
@@ -72,7 +93,7 @@ func InitAppreview(group *gin.RouterGroup) {
 			"pkg":      pkg,
 			"platform": platform,
 			"status":   "stop",
-			"cron":     tasks.Ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
+			"message":  tasks.Ternary(flag, "停止-定时任务成功 ", "没有对应任务"),
 		})
 	})
 }

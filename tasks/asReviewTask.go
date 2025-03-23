@@ -4,6 +4,7 @@ import (
 	"cronServer/constant"
 	"cronServer/database"
 	"cronServer/models"
+	"cronServer/utils"
 	"cronServer/webhook"
 	"fmt"
 	"net/http"
@@ -50,7 +51,7 @@ func (t *AsReviewTask) Run() {
 	version = strings.ReplaceAll(version, "version", "")
 	version = strings.TrimSpace(version)
 
-	cmpValue := strings.Compare(version, t.appReviewRecord.Ver)
+	cmpValue := utils.VersionCompare(version, t.appReviewRecord.Ver)
 	if cmpValue == 0 {
 		fmt.Println("检测到版本审核-成功")
 		t.appReviewRecord.ApproveTs = int(updateTime)
