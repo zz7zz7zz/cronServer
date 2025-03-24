@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 )
 
@@ -19,10 +20,16 @@ func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
 	if appReviewRecord.Platform == constant.Android {
 		task := NewGpRewiewTask(appReviewRecord)
 		id := innerStartTask("10 * * * * * ", task)
+		if gin.Mode() == gin.ReleaseMode {
+			id = innerStartTask("0 */10 * * * *", task)
+		}
 		GPendingTasks[key] = id
 	} else if appReviewRecord.Platform == constant.Ios {
 		task := NewAsReviewTask(appReviewRecord)
 		id2 := innerStartTask("10 * * * * * ", task)
+		if gin.Mode() == gin.ReleaseMode {
+			id2 = innerStartTask("0 */10 * * * *", task)
+		}
 		GPendingTasks[key] = id2
 	}
 }

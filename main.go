@@ -18,6 +18,7 @@ func main() {
 	database.InitDb()
 
 	r := gin.Default()
+	// gin.SetMode(gin.ReleaseMode)
 	// r.GET("/ping", func(c *gin.Context) {
 	// 	c.JSON(http.StatusOK, gin.H{
 	// 		"message": "pong",
