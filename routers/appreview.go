@@ -3,6 +3,7 @@ package routers
 import (
 	"cronServer/constant"
 	"cronServer/database"
+	"cronServer/models"
 	"cronServer/tasks"
 	"cronServer/utils"
 	"fmt"
@@ -57,7 +58,14 @@ func InitAppreview(group *gin.RouterGroup) {
 			maxVer = appReviewRecord.Ver
 		}
 
-		status, taskStatus, err := tasks.StartTask(ver, pkg, platform)
+		in := &models.AppReviewRecord{
+			Ver:        ver,
+			Pkg:        pkg,
+			Platform:   platform,
+			Status:     int(constant.ReviewPending),
+			TaskStatus: int(constant.TaskRunning),
+		}
+		status, taskStatus, err := tasks.StartTask(in)
 		fmt.Print("status taskStatus err ", status, taskStatus, err, maxVer)
 
 		message := tasks.Ternary(taskStatus == constant.TaskRunning, "已存在相同任务 ", "启动-定时任务成功")
@@ -87,7 +95,14 @@ func InitAppreview(group *gin.RouterGroup) {
 		pkg := c.Query("pkg")
 		platform := c.Query("platform")
 
-		flag := tasks.StopTask(ver, pkg, platform)
+		appReviewRecord := &models.AppReviewRecord{
+			Ver:        ver,
+			Pkg:        pkg,
+			Platform:   platform,
+			TaskStatus: int(constant.TaskStop),
+		}
+
+		flag := tasks.StopTask(appReviewRecord)
 		c.JSON(http.StatusOK, gin.H{
 			"ver":      ver,
 			"pkg":      pkg,

@@ -83,10 +83,12 @@ func GetMaxVersionRecord(pkg, platform string) (*models.AppReviewRecord, error) 
 	return &record, err
 }
 
-func Insert(platform string, ver string, pkg string, status constant.ReviewStatus, taskstatus constant.TaskStatus) (constant.ReviewStatus, constant.TaskStatus, error) {
-
-	iStatus := int(status)
-	iTaskStatus := int(taskstatus)
+func Insert(appReviewRecord *models.AppReviewRecord) (constant.ReviewStatus, constant.TaskStatus, error) {
+	iTaskStatus := int(appReviewRecord.TaskStatus)
+	iStatus := int(appReviewRecord.Status)
+	platform := appReviewRecord.Platform
+	ver := appReviewRecord.Ver
+	pkg := appReviewRecord.Pkg
 
 	// 1. 检查记录是否已存在
 	var existingRecord models.AppReviewRecord
@@ -156,8 +158,11 @@ func Insert(platform string, ver string, pkg string, status constant.ReviewStatu
 // 	return nil
 // }
 
-func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus constant.TaskStatus) error {
-	iTaskStatus := int(taskstatus)
+func UpdateTaskStatus(appReviewRecord *models.AppReviewRecord) error {
+	iTaskStatus := int(appReviewRecord.TaskStatus)
+	platform := appReviewRecord.Platform
+	ver := appReviewRecord.Ver
+	pkg := appReviewRecord.Pkg
 	if platform == "" || ver == "" || pkg == "" {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
@@ -179,8 +184,11 @@ func UpdateTaskStatus(platform string, ver string, pkg string, taskstatus consta
 	return nil
 }
 
-func UpdateStatus(platform string, ver string, pkg string, status constant.ReviewStatus) error {
-	iStatus := int(status)
+func UpdateStatus(appReviewRecord *models.AppReviewRecord) error {
+	iStatus := int(appReviewRecord.Status)
+	platform := appReviewRecord.Platform
+	ver := appReviewRecord.Ver
+	pkg := appReviewRecord.Pkg
 	if platform == "" || ver == "" || pkg == "" {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
