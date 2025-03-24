@@ -1,29 +1,25 @@
 server:
-  host: 
-  port: 
+  host: "0.0.0.0"
+  port: 8080
 
 database:
-  host: 
-  port: 
-  name: 
-  user: 
-  password: 
-  params: 
-
-redis:
-  host: 
-  port: 
-  auth: 
-
-es:
-  host: 
-  port: 
+  host: 172.18.26.11
+  port: 3306
+  name: melo_appreview
+  user: melo
+  password: jpYU7CJ5t36e
+  params: charset=utf8mb4&parseTime=True&loc=Local
 
 webhook:
   wechat:
-    key: 
-  ourserver:
-    referer: 
-    url: 
-    username: 
-    password: 
+    key: 7654a703-eba9-4ddd-92c1-f1f3afd89562
+  # ourserver:
+  #   referer: http://system-api.dev.moyuvedio.com
+  #   url: http://melo-testbackend.moyuvedio.com
+  #   username: admin
+  #   password: 123456
+    ourserver:
+    referer: http://system-api.moyuvedio.com/
+    url: https://hobi-backend.inhobichat.com
+    username: Longyang
+    password: Dy123456

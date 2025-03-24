@@ -53,11 +53,12 @@ func (t *GpReviewTask) Run() {
 	if cmpValue == 0 {
 		fmt.Println("检测到版本审核-成功")
 		t.appReviewRecord.ApproveTs = int(updateTime)
-		hook := &webhook.ServerWebHook{}
-		hook.OnWebHook(t.appReviewRecord)
 		database.UpdateTaskStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 3)
 		database.UpdateStatus(t.appReviewRecord.Platform, t.appReviewRecord.Ver, t.appReviewRecord.Pkg, 1)
 		StopTask(t.appReviewRecord.Ver, t.appReviewRecord.Pkg, t.appReviewRecord.Platform)
+
+		hook := &webhook.ServerWebHook{}
+		hook.OnWebHook(t.appReviewRecord)
 	} else {
 		if cmpValue == 1 {
 			fmt.Println("检测到版本审核-已有更新的版本，当前任务将忽略")
