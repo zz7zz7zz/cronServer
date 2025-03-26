@@ -37,7 +37,7 @@ func (w EnterpriseWechat) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 	}
 
 	content := fmt.Sprintf("---------------提醒：%s 审核通过---------------\n版本：%s\n包名：%s\n渠道：%s\n链接：%s\n任务创建时间(UTC)：%s\n审核通过时间(UTC)：%s\n\n审核开关已自动设置\n\n", appReviewRecord.Platform, appReviewRecord.Ver, appReviewRecord.Pkg, channel, url, tUTCtUTCCreateStr, tUTCApproveStr)
-	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+config.GConfig.Webhook.Wechat.Key, "application/json", strings.NewReader(`{"msgtype": "text", "text": {"content": "`+content+`","mentioned_list":["@all"]}}`))
+	resp, err := http.Post("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="+config.G_Config.Webhook.Wechat.Key, "application/json", strings.NewReader(`{"msgtype": "text", "text": {"content": "`+content+`","mentioned_list":["@all"]}}`))
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return

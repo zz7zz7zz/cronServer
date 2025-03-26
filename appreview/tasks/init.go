@@ -12,7 +12,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var GCron *cron.Cron
+var G_Cron *cron.Cron
 
 var GPendingTasks = make(map[string]cron.EntryID)
 
@@ -32,7 +32,7 @@ func RecoverAppReviewTasks() {
 }
 
 func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
-	GCron = cron.New(cron.WithSeconds())
+	G_Cron = cron.New(cron.WithSeconds())
 	if appReviewRecord.Platform == constant.Android {
 		task := NewGooglePlayRewiewTask(appReviewRecord)
 		id := innerStartTask("10 * * * * * ", task)
@@ -51,13 +51,13 @@ func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
 }
 
 func innerStartTask(spec string, cmd cron.Job) cron.EntryID {
-	id2, err := GCron.AddJob(spec, cmd)
+	id2, err := G_Cron.AddJob(spec, cmd)
 	if err != nil {
 		fmt.Println("Error is ", err.Error())
 		return -1
 	}
 	fmt.Println("innerStartTask ID: ", id2)
-	GCron.Start()
+	G_Cron.Start()
 	return id2
 }
 
@@ -82,7 +82,7 @@ func StopTask(appReviewRecord *models.AppReviewRecord) bool {
 	value, flag := GPendingTasks[key]
 	if flag {
 		delete(GPendingTasks, key)
-		GCron.Remove(value)
+		G_Cron.Remove(value)
 		database.UpdateTaskStatus(appReviewRecord)
 	}
 	return flag

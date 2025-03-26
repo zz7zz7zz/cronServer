@@ -36,7 +36,7 @@ func main() {
 	// 	})
 	// })
 	routers.InitRouters(r)
-	r.Run(":" + strconv.Itoa(config.GConfig.Server.Port))
+	r.Run(":" + strconv.Itoa(config.G_Config.Server.Port))
 
 	// 不退出
 	// go startTasks()

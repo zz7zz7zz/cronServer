@@ -87,14 +87,14 @@ func (s ServerWebHook) OnWebHook(appReviewRecord *models.AppReviewRecord) {
 func getToken() (string, error) {
 	// 构造请求数据
 	requestData := map[string]interface{}{
-		"username": config.GConfig.Webhook.OurServer.Username,
-		"password": config.GConfig.Webhook.OurServer.Password, // 复杂数据可以序列化为JSON字符串
+		"username": config.G_Config.Webhook.OurServer.Username,
+		"password": config.G_Config.Webhook.OurServer.Password, // 复杂数据可以序列化为JSON字符串
 	}
 	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
 	// 发送 POST 请求
-	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.Referer+"/user/login", headers, requestData)
+	response, err := PostJSON("POST", config.G_Config.Webhook.OurServer.Referer+"/user/login", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return "", err
@@ -137,7 +137,7 @@ func versionAdd(token string, version string) (int, error) {
 		"Authorization": "Bearer " + token,
 	}
 
-	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/mq/app/version/add", headers, requestData)
+	response, err := PostJSON("POST", config.G_Config.Webhook.OurServer.URL+"/mq/app/version/add", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -170,7 +170,7 @@ func versionDetail(token string, id int) (*VersionDetail, error) {
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	body, statusCode, err := GetJSON(config.GConfig.Webhook.OurServer.URL+"/mq/app/version/detail?id="+strconv.Itoa(id), headers)
+	body, statusCode, err := GetJSON(config.G_Config.Webhook.OurServer.URL+"/mq/app/version/detail?id="+strconv.Itoa(id), headers)
 	fmt.Printf("Status: %d\nResponse: %s\n", statusCode, body)
 	if err != nil {
 		fmt.Println("请求失败:", statusCode, err)
@@ -224,7 +224,7 @@ func versioncontrol(token string, id int, vd *VersionDetail, platform string) (i
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	response, err := PostJSON("POST", config.GConfig.Webhook.OurServer.URL+"/mq/app/version/control", headers, requestData)
+	response, err := PostJSON("POST", config.G_Config.Webhook.OurServer.URL+"/mq/app/version/control", headers, requestData)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 		return -1, err
@@ -257,7 +257,7 @@ func versionList(token string) (*VersionList, error) {
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + token,
 	}
-	body, statusCode, err := GetJSON(config.GConfig.Webhook.OurServer.URL+"/mq/app/version/lists?page=1&size=20", headers)
+	body, statusCode, err := GetJSON(config.G_Config.Webhook.OurServer.URL+"/mq/app/version/lists?page=1&size=20", headers)
 	fmt.Printf("Status: %d\nResponse: %s\n", statusCode, body)
 	if err != nil {
 		fmt.Println("请求失败:", statusCode, err)

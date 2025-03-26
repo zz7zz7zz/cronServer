@@ -13,13 +13,13 @@ import (
 	"open.com/cronServer/appreview/models"
 )
 
-var DB *gorm.DB
+var G_DB *gorm.DB
 
 func InitDb() {
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", config.GConfig.Database.User, config.GConfig.Database.Password, config.GConfig.Database.Host, config.GConfig.Database.Port, config.GConfig.Database.Name, config.GConfig.Database.Params)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", config.G_Config.Database.User, config.G_Config.Database.Password, config.G_Config.Database.Host, config.G_Config.Database.Port, config.G_Config.Database.Name, config.G_Config.Database.Params)
 	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	G_DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Print("Init DB Error", err)
 		return
@@ -31,7 +31,7 @@ func GetList(platform string, ver string, pkg string, status constant.ReviewStat
 	iStatus := int(status)
 	iTaskStatus := int(taskstatus)
 	var ret []models.AppReviewRecord
-	query := DB.Model(&models.AppReviewRecord{})
+	query := G_DB.Model(&models.AppReviewRecord{})
 
 	// 动态拼接条件
 	if platform != "" {
@@ -71,7 +71,7 @@ func GetMaxVersionRecord(pkg, platform string) (*models.AppReviewRecord, error) 
     `
 
 	// 执行查询
-	err := DB.Model(&models.AppReviewRecord{}).
+	err := G_DB.Model(&models.AppReviewRecord{}).
 		Where("pkg = ? AND platform = ?", pkg, platform).
 		Order(orderByExpr).
 		First(&record).
@@ -92,12 +92,12 @@ func Insert(appReviewRecord *models.AppReviewRecord) (constant.ReviewStatus, con
 
 	// 1. 检查记录是否已存在
 	var existingRecord models.AppReviewRecord
-	result := DB.Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).First(&existingRecord)
+	result := G_DB.Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).First(&existingRecord)
 
 	// 2. 如果已存在，更新 taskstatus 字段
 	if result.Error == nil {
 		existingRecord.TaskStatus = iStatus
-		if err := DB.Save(&existingRecord).Error; err != nil {
+		if err := G_DB.Save(&existingRecord).Error; err != nil {
 			return constant.ReviewStatus(existingRecord.Status), constant.TaskStatus(existingRecord.TaskStatus), fmt.Errorf("更新失败: %v", err)
 		}
 		return constant.ReviewStatus(existingRecord.Status), constant.TaskStatus(existingRecord.TaskStatus), nil
@@ -116,7 +116,7 @@ func Insert(appReviewRecord *models.AppReviewRecord) (constant.ReviewStatus, con
 		}
 
 		// 插入数据库
-		if err := DB.Create(&newRecord).Error; err != nil {
+		if err := G_DB.Create(&newRecord).Error; err != nil {
 			return constant.ReviewPending, constant.TaskNotStart, fmt.Errorf("插入失败: %v", err)
 		}
 		return constant.ReviewPending, constant.TaskNotStart, nil
@@ -167,7 +167,7 @@ func UpdateTaskStatus(appReviewRecord *models.AppReviewRecord) error {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
 	// 查找符合条件的记录
-	result := DB.Model(&models.AppReviewRecord{}).
+	result := G_DB.Model(&models.AppReviewRecord{}).
 		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
 		Update("task_status", iTaskStatus)
 
@@ -193,7 +193,7 @@ func UpdateStatus(appReviewRecord *models.AppReviewRecord) error {
 		return fmt.Errorf("platform/ver/pkg 参数不可为空")
 	}
 	// 查找符合条件的记录
-	result := DB.Model(&models.AppReviewRecord{}).
+	result := G_DB.Model(&models.AppReviewRecord{}).
 		Where("platform = ? AND ver = ? AND pkg = ?", platform, ver, pkg).
 		Update("status", iStatus)
 
