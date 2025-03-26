@@ -20,10 +20,18 @@ func InitAppreviewV1(group *gin.RouterGroup) {
 
 	//查询审核状态
 	appreview.POST("/list", func(c *gin.Context) {
-		ver := c.Query("ver")
-		pkg := c.Query("pkg")
-		platform := c.Query("platform")
-		statusStr := c.DefaultQuery("status", "0")
+		req := &models.RequestStart{}
+		err := c.ShouldBind(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		pkg := req.Pkg
+		ver := req.Ver
+		platform := req.Platform
+		statusStr := req.Status
+
 		status, err := strconv.Atoi(statusStr)
 		if err != nil {
 			// 参数无效时的处理逻辑（如返回错误响应）
@@ -36,9 +44,17 @@ func InitAppreviewV1(group *gin.RouterGroup) {
 
 	//
 	appreview.POST("/start", func(c *gin.Context) {
-		pkg := c.Query("pkg")
-		ver := c.Query("ver")
-		platform := c.Query("platform")
+
+		req := &models.RequestStart{}
+		err := c.ShouldBind(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		pkg := req.Pkg
+		ver := req.Ver
+		platform := req.Platform
 
 		appReviewRecord, err := database.GetMaxVersionRecord(pkg, platform)
 		maxVer := ""
@@ -79,9 +95,17 @@ func InitAppreviewV1(group *gin.RouterGroup) {
 
 	//
 	appreview.POST("/stop", func(c *gin.Context) {
-		ver := c.Query("ver")
-		pkg := c.Query("pkg")
-		platform := c.Query("platform")
+
+		req := &models.RequestStart{}
+		err := c.ShouldBind(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		pkg := req.Pkg
+		ver := req.Ver
+		platform := req.Platform
 
 		appReviewRecord := &models.AppReviewRecord{
 			Ver:        ver,
