@@ -1,4 +1,4 @@
-module cronServer
+module open.com/cronServer
 
 go 1.23.4
 

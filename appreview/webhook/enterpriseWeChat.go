@@ -1,14 +1,15 @@
 package webhook
 
 import (
-	"cronServer/config"
-	"cronServer/constant"
-	"cronServer/models"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"open.com/cronServer/appreview/config"
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/models"
 )
 
 type EnterpriseWechat struct {

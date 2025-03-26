@@ -1,6 +1,6 @@
 package webhook
 
-import "cronServer/models"
+import "open.com/cronServer/appreview/models"
 
 type Webhook interface {
 	OnWebHook(appReviewRecord *models.AppReviewRecord)

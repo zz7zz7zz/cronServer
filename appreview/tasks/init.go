@@ -1,11 +1,12 @@
 package tasks
 
 import (
-	"cronServer/constant"
-	"cronServer/database"
-	"cronServer/models"
 	"fmt"
 	"time"
+
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/database"
+	"open.com/cronServer/appreview/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"

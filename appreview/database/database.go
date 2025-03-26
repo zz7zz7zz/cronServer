@@ -8,9 +8,9 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"cronServer/config"
-	"cronServer/constant"
-	"cronServer/models"
+	"open.com/cronServer/appreview/config"
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/models"
 )
 
 var DB *gorm.DB

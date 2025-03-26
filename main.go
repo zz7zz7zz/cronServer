@@ -1,11 +1,12 @@
 package main
 
 import (
-	"cronServer/config"
-	"cronServer/database"
-	"cronServer/routers"
-	"cronServer/tasks"
 	"strconv"
+
+	"open.com/cronServer/appreview/config"
+	"open.com/cronServer/appreview/database"
+	"open.com/cronServer/appreview/tasks"
+	"open.com/cronServer/routers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +20,13 @@ func main() {
 	database.InitDb()
 
 	tasks.RecoverAppReviewTasks()
+
+	//-------------------- Test start --------------------
 	// task := tasks.NewAsReviewTask(&models.AppReviewRecord{Ver: "2.21.6", Pkg: "1596875621", Platform: constant.Ios})
 	// task.Run()
 	// task := tasks.NewGpRewiewTask(&models.AppReviewRecord{Ver: "2.21.2", Pkg: "com.inhobichat.hobichat", Platform: constant.Android})
 	// task.Run()
+	//-------------------- Test end --------------------
 
 	r := gin.Default()
 	// gin.SetMode(gin.ReleaseMode)

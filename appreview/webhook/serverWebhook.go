@@ -2,9 +2,6 @@ package webhook
 
 import (
 	"bytes"
-	"cronServer/config"
-	"cronServer/constant"
-	"cronServer/models"
 	"encoding/json"
 	"fmt"
 	_ "go/constant"
@@ -12,6 +9,10 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"open.com/cronServer/appreview/config"
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/models"
 )
 
 type ServerWebHook struct {

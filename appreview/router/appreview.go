@@ -1,14 +1,15 @@
-package routers
+package router
 
 import (
-	"cronServer/constant"
-	"cronServer/database"
-	"cronServer/models"
-	"cronServer/tasks"
-	"cronServer/utils"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/database"
+	"open.com/cronServer/appreview/models"
+	"open.com/cronServer/appreview/tasks"
+	"open.com/cronServer/appreview/utils"
 
 	"github.com/gin-gonic/gin"
 )

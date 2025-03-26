@@ -1,16 +1,17 @@
 package tasks
 
 import (
-	"cronServer/constant"
-	"cronServer/database"
-	"cronServer/models"
-	"cronServer/utils"
-	"cronServer/webhook"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
 	"time"
+
+	"open.com/cronServer/appreview/constant"
+	"open.com/cronServer/appreview/database"
+	"open.com/cronServer/appreview/models"
+	"open.com/cronServer/appreview/utils"
+	"open.com/cronServer/appreview/webhook"
 
 	"github.com/PuerkitoBio/goquery"
 )
