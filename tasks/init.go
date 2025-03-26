@@ -15,6 +15,21 @@ var GCron *cron.Cron
 
 var GPendingTasks = make(map[string]cron.EntryID)
 
+func RecoverAppReviewTasks() {
+	appleReviewRecords := database.GetList("", "", "", constant.ReviewPending, constant.TaskRunning)
+	//自动开启以下任务
+	for _, record := range appleReviewRecords {
+		if record.TaskStatus == 1 {
+			key := fmt.Sprintf("%s_%s_%s", record.Platform, record.Ver, record.Pkg)
+			_, flag := GPendingTasks[key]
+			if !flag {
+				fmt.Println("自动开启任务 ", key)
+				StartTasks(&record, key)
+			}
+		}
+	}
+}
+
 func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
 	GCron = cron.New(cron.WithSeconds())
 	if appReviewRecord.Platform == constant.Android {

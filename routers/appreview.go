@@ -15,19 +15,6 @@ import (
 
 func InitAppreview(group *gin.RouterGroup) {
 
-	appleReviewRecords := database.GetList("", "", "", constant.ReviewPending, constant.TaskRunning)
-	//自动开启以下任务
-	for _, record := range appleReviewRecords {
-		if record.TaskStatus == 1 {
-			key := fmt.Sprintf("%s_%s_%s", record.Platform, record.Ver, record.Pkg)
-			_, flag := tasks.GPendingTasks[key]
-			if !flag {
-				fmt.Println("自动开启任务 ", key)
-				tasks.StartTasks(&record, key)
-			}
-		}
-	}
-
 	appreview := group.Group("/appreview")
 
 	//查询审核状态
