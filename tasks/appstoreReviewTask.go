@@ -16,17 +16,17 @@ import (
 )
 
 // Apple Stroe Review Task
-type AsReviewTask struct {
+type AppStoreReviewTask struct {
 	appReviewRecord *models.AppReviewRecord
 }
 
-func NewAsReviewTask(appReviewRecord *models.AppReviewRecord) *AsReviewTask {
-	t := &AsReviewTask{
+func NewAppstoreReviewTask(appReviewRecord *models.AppReviewRecord) *AppStoreReviewTask {
+	t := &AppStoreReviewTask{
 		appReviewRecord: appReviewRecord}
 	return t
 }
 
-func (t *AsReviewTask) Run() {
+func (t *AppStoreReviewTask) Run() {
 	now := time.Now()
 	fmt.Println("------Apple start------", now.Format("2006-01-02 15:04:05"))
 	version, updateTime, err := scrapeAppStore(t.appReviewRecord.Pkg)

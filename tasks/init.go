@@ -18,14 +18,14 @@ var GPendingTasks = make(map[string]cron.EntryID)
 func StartTasks(appReviewRecord *models.AppReviewRecord, key string) {
 	GCron = cron.New(cron.WithSeconds())
 	if appReviewRecord.Platform == constant.Android {
-		task := NewGpRewiewTask(appReviewRecord)
+		task := NewGooglePlayRewiewTask(appReviewRecord)
 		id := innerStartTask("10 * * * * * ", task)
 		if gin.Mode() == gin.ReleaseMode {
 			id = innerStartTask("0 */10 * * * *", task)
 		}
 		GPendingTasks[key] = id
 	} else if appReviewRecord.Platform == constant.Ios {
-		task := NewAsReviewTask(appReviewRecord)
+		task := NewAppstoreReviewTask(appReviewRecord)
 		id2 := innerStartTask("10 * * * * * ", task)
 		if gin.Mode() == gin.ReleaseMode {
 			id2 = innerStartTask("0 */10 * * * *", task)

@@ -16,17 +16,17 @@ import (
 )
 
 // Google Stroe Review Task
-type GpReviewTask struct {
+type GooglePlayReviewTask struct {
 	appReviewRecord *models.AppReviewRecord
 }
 
-func NewGpRewiewTask(appReviewRecord *models.AppReviewRecord) *GpReviewTask {
-	t := &GpReviewTask{
+func NewGooglePlayRewiewTask(appReviewRecord *models.AppReviewRecord) *GooglePlayReviewTask {
+	t := &GooglePlayReviewTask{
 		appReviewRecord: appReviewRecord}
 	return t
 }
 
-func (t *GpReviewTask) Run() {
+func (t *GooglePlayReviewTask) Run() {
 	now := time.Now()
 	fmt.Println("------Google start------", now.Format("2006-01-02 15:04:05"), t)
 	version, updateTime, err := scrapePlayStore(t.appReviewRecord.Pkg)
