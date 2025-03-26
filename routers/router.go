@@ -9,4 +9,6 @@ import (
 func InitRouters(r *gin.Engine) {
 	api := r.Group("/api")
 	router.InitAppreview(api)
+	router.InitAppreviewV1(api)
+	router.InitAppreviewV2(api)
 }
