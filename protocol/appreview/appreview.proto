@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+// option go_package="path;name" path:标识生成存放地址，会自动生产目录
+option go_package="../appreview"
+
+// 指定文件生成出来的package
+package appreview;
+
+message AppReviewRequest{
+    string ver = 1;
+    string pkg = 2;
+    string platform = 3;
+    string status = 4;
+}
+
+message AppReviewResponse{
+    string ver = 1;
+    string pkg = 2;
+    string platform = 3;
+    string status = 4;
+    string key = 5;
+    string message = 6;
+}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"google.golang.org/protobuf/proto"
 	"open.com/cronServer/appreview/constant"
 	"open.com/cronServer/appreview/database"
 	"open.com/cronServer/appreview/models"
@@ -36,9 +37,23 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 
 	//
 	appreview.POST("/start", func(c *gin.Context) {
-		pkg := c.Query("pkg")
-		ver := c.Query("ver")
-		platform := c.Query("platform")
+		// 1. 读取请求体
+		body, err := c.GetRawData()
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		}
+
+		// 2. 解析 Protobuf 数据
+		var req models.AppReviewRequest
+		if err := proto.Unmarshal(body, &req); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid protobuf data"})
+			return
+		}
+
+		pkg := req.Pkg
+		ver := req.Ver
+		platform := req.Platform
+		status := req.Status
 
 		appReviewRecord, err := database.GetMaxVersionRecord(pkg, platform)
 		maxVer := ""
@@ -66,15 +81,26 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 			}
 
 		}
+		
+		// 3. 处理业务逻辑
+		response := &models.AppReviewResponse{
+			Message:  message,
+			Ver:      ver,
+			Pkg:      pkg,
+			Platform: platform,
+			status:"start",
+			Key:fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
+		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"ver":      ver,
-			"pkg":      pkg,
-			"platform": platform,
-			"key":      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
-			"status":   "start",
-			"message":  message,
-		})
+		// 4. 序列化响应
+		protoData, err := proto.Marshal(response)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to marshal response"})
+			return
+		}
+
+		// 5. 设置响应头并返回
+		c.Data(http.StatusOK, "application/x-protobuf", protoData)
 	})
 
 	//
