@@ -11,16 +11,17 @@ import (
 	"open.com/cronServer/appreview/models"
 	"open.com/cronServer/appreview/tasks"
 	"open.com/cronServer/appreview/utils"
+	"open.com/cronServer/protocol/src/appreview"
 
 	"github.com/gin-gonic/gin"
 )
 
 func InitAppreviewV2(group *gin.RouterGroup) {
 
-	appreview := group.Group("/appreview/v2")
+	v2 := group.Group("/appreview/v2")
 
 	//查询审核状态
-	appreview.POST("/list", func(c *gin.Context) {
+	v2.POST("/list", func(c *gin.Context) {
 		ver := c.Query("ver")
 		pkg := c.Query("pkg")
 		platform := c.Query("platform")
@@ -36,7 +37,7 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 	})
 
 	//
-	appreview.POST("/start", func(c *gin.Context) {
+	v2.POST("/start", func(c *gin.Context) {
 		// 1. 读取请求体
 		body, err := c.GetRawData()
 		if err != nil {
@@ -44,7 +45,7 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 		}
 
 		// 2. 解析 Protobuf 数据
-		var req models.AppReviewRequest
+		var req appreview.AppReviewRequest
 		if err := proto.Unmarshal(body, &req); err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid protobuf data"})
 			return
@@ -53,7 +54,7 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 		pkg := req.Pkg
 		ver := req.Ver
 		platform := req.Platform
-		status := req.Status
+		// status := req.Status
 
 		appReviewRecord, err := database.GetMaxVersionRecord(pkg, platform)
 		maxVer := ""
@@ -81,15 +82,15 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 			}
 
 		}
-		
+
 		// 3. 处理业务逻辑
-		response := &models.AppReviewResponse{
+		response := &appreview.AppReviewResponse{
 			Message:  message,
 			Ver:      ver,
 			Pkg:      pkg,
 			Platform: platform,
-			status:"start",
-			Key:fmt.Sprintf("%s_%s_%s", platform, ver, pkg)
+			Status:   "start",
+			Key:      fmt.Sprintf("%s_%s_%s", platform, ver, pkg),
 		}
 
 		// 4. 序列化响应
@@ -104,7 +105,7 @@ func InitAppreviewV2(group *gin.RouterGroup) {
 	})
 
 	//
-	appreview.POST("/stop", func(c *gin.Context) {
+	v2.POST("/stop", func(c *gin.Context) {
 		ver := c.Query("ver")
 		pkg := c.Query("pkg")
 		platform := c.Query("platform")
