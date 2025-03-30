@@ -34,6 +34,7 @@ var rootCmd = &cobra.Command{
 
 		fmt.Println("root cmd run ends")
 	},
+	TraverseChildren: true,
 }
 
 func Execute() {
