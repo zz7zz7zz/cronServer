@@ -6,6 +6,7 @@ import (
 	"open.com/cronServer/appreview/config"
 	"open.com/cronServer/appreview/database"
 	"open.com/cronServer/appreview/tasks"
+	"open.com/cronServer/cmd"
 	"open.com/cronServer/routers"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,16 @@ import (
 //https://www.bilibili.com/video/BV1Rd4y1C7A1/?spm_id_from=333.337.search-card.all.click&vd_source=630aca8d31fad0f6a159cf69cf0dca35
 
 func main() {
+
+	main_cmd()
+	// main_appreview()
+}
+
+func main_cmd() {
+	cmd.Execute()
+}
+
+func main_appreview() {
 
 	config.InitConfig()
 	database.InitDb()
