@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.myapp.frpc</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/long/Downloads/frp_0.62.1_darwin_amd64/frpc</string>
+        <string>-c</string>
+	<string>/Users/long/Downloads/frp_0.62.1_darwin_amd64/frpc.toml</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>/Users/long/Downloads/frp_0.62.1_darwin_amd64</string>
+    <key>StandardOutPath</key>
+    <string>/Users/long/Downloads/frp_0.62.1_darwin_amd64/frpc.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/long/Downloads/frp_0.62.1_darwin_amd64/frpc.err.log</string>
+</dict>
+</plist>
