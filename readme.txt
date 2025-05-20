@@ -17,6 +17,9 @@ https://zhuanlan.zhihu.com/p/697533940
 https://blog.csdn.net/m0_62160083/article/details/144805346
 
 
+//搭建多个服务
+https://gofrp.org/zh-cn/docs/examples/vhost-http/
+
 Linux
 frps常驻
 # 启动frp
@@ -60,3 +63,8 @@ launchctl start com.myapp.frpc
 //------------------------------------------
 # 查看状态
 launchctl list | grep frp
+
+
+//--------------搭建git--------------
+https://blog.csdn.net/weixin_42286658/article/details/144768578
+https://zhuanlan.zhihu.com/p/1900156203096609244
